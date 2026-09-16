@@ -29,7 +29,7 @@ export function AvatarPicker({ url, nickname }: { url: string | null; nickname: 
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.7,
+      // 압축은 uploadAvatar 에서 한 번만 합니다 (여기 quality 는 PNG 에 안 먹습니다)
     });
     if (result.canceled) return;
 

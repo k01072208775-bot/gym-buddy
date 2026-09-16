@@ -1,4 +1,5 @@
 import { File } from 'expo-file-system';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
 import { supabase } from '@/lib/supabase';
 import type { Database, Profile, WorkoutPrefs } from '@/types/database';
@@ -7,6 +8,9 @@ export type MyProfile = Profile & { prefs: WorkoutPrefs | null };
 
 type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
 type PrefsInsert = Database['public']['Tables']['workout_prefs']['Insert'];
+
+/** 프로필 사진의 가로 최대 길이(px). 목록에 여러 장 뜨므로 원본을 그대로 쓰지 않습니다. */
+const AVATAR_WIDTH = 512;
 
 /**
  * 내 프로필 + 운동 취향을 함께 가져옵니다.
@@ -46,6 +50,23 @@ export async function upsertPrefs(input: PrefsInsert): Promise<WorkoutPrefs> {
 }
 
 /**
+ * 사진첩에서 고른 원본을 업로드용으로 줄입니다.
+ *
+ * 압축을 이미지 선택기의 quality 옵션에 맡기면 안 됩니다.
+ * 그 옵션은 JPEG 에만 먹어서, PNG 로 나오는 안드로이드에서는
+ * 1.4MB 짜리 원본이 그대로 올라갔습니다. 여기서 형식까지 JPEG 로 고정합니다.
+ */
+async function toUploadableJpeg(localUri: string): Promise<string> {
+  const context = ImageManipulator.manipulate(localUri);
+  // height 를 주지 않으면 비율을 유지하므로 정사각형이 아니어도 찌그러지지 않습니다
+  context.resize({ width: AVATAR_WIDTH });
+
+  const rendered = await context.renderAsync();
+  const saved = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.7 });
+  return saved.uri;
+}
+
+/**
  * 프로필 사진 업로드.
  * 경로를 avatars/<userId>/... 로 고정해야 스토리지 RLS 정책과 맞습니다.
  *
@@ -54,15 +75,13 @@ export async function upsertPrefs(input: PrefsInsert): Promise<WorkoutPrefs> {
  *   업로드 자체는 성공하므로 에러도 안 나고, 사진만 안 보입니다.
  */
 export async function uploadAvatar(userId: string, localUri: string): Promise<string> {
-  // 사진첩 URI 에 확장자가 없거나 낯선 경우가 있어 아는 형식으로만 맞춥니다
-  const raw = (localUri.split('?')[0].split('.').pop() ?? '').toLowerCase();
-  const extension = ['jpg', 'jpeg', 'png', 'webp'].includes(raw) ? raw : 'jpg';
-  const path = `${userId}/avatar.${extension}`;
+  const uploadUri = await toUploadableJpeg(localUri);
+  const path = `${userId}/avatar.jpg`;
 
-  const bytes = await new File(localUri).bytes();
+  const bytes = await new File(uploadUri).bytes();
 
   const { error } = await supabase.storage.from('avatars').upload(path, bytes, {
-    contentType: `image/${extension === 'jpg' ? 'jpeg' : extension}`,
+    contentType: 'image/jpeg',
     upsert: true,
   });
   if (error) throw error;
