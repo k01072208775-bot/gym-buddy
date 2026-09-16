@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -9,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { useCandidates, useSwipe } from '@/features/matching/hooks';
 import { reportAndBlock } from '@/features/safety/api';
 import { useAppColors } from '@/hooks/use-app-colors';
@@ -24,6 +26,8 @@ export default function DiscoverScreen() {
   const colors = useAppColors();
   const { data, isPending, isRefetching, refetch, error } = useCandidates();
   const swipe = useSwipe();
+
+  const [reportTarget, setReportTarget] = useState<Candidate | null>(null);
 
   if (isPending) {
     return (
@@ -44,29 +48,37 @@ export default function DiscoverScreen() {
   }
 
   return (
-    <FlatList
-      style={{ backgroundColor: colors.background }}
-      data={data}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.list}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-      ListEmptyComponent={
-        <View style={styles.center}>
-          <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            지금은 보여드릴 사람이 없어요.{'\n'}조금 뒤에 다시 확인해주세요.
-          </Text>
-        </View>
-      }
-      renderItem={({ item }) => (
-        <CandidateCard
-          candidate={item}
-          colors={colors}
-          onLike={() => handleSwipe(item, 'like')}
-          onPass={() => handleSwipe(item, 'pass')}
-          onReport={() => handleReport(item)}
-        />
-      )}
-    />
+    <>
+      <FlatList
+        style={{ backgroundColor: colors.background }}
+        data={data}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+        ListEmptyComponent={
+          <View style={styles.center}>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+              지금은 보여드릴 사람이 없어요.{'\n'}조금 뒤에 다시 확인해주세요.
+            </Text>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <CandidateCard
+            candidate={item}
+            colors={colors}
+            onLike={() => handleSwipe(item, 'like')}
+            onPass={() => handleSwipe(item, 'pass')}
+            onReport={() => setReportTarget(item)}
+          />
+        )}
+      />
+
+      <ReportReasonModal
+        visible={reportTarget !== null}
+        onClose={() => setReportTarget(null)}
+        onSelect={handleReport}
+      />
+    </>
   );
 
   function handleSwipe(candidate: Candidate, action: 'like' | 'pass') {
@@ -83,22 +95,18 @@ export default function DiscoverScreen() {
     );
   }
 
-  function handleReport(candidate: Candidate) {
-    Alert.alert('이 사용자를 신고할까요?', '신고하면 서로 보이지 않게 차단됩니다.', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '신고하고 차단',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await reportAndBlock({ targetId: candidate.id, reason: 'other' });
-            await refetch();
-          } catch (err) {
-            Alert.alert('실패', (err as Error).message);
-          }
-        },
-      },
-    ]);
+  async function handleReport(reason: string) {
+    if (!reportTarget) return;
+    const target = reportTarget;
+    setReportTarget(null);
+
+    try {
+      await reportAndBlock({ targetId: target.id, reason });
+      await refetch();
+      Alert.alert('신고가 접수됐어요', '이제 서로에게 보이지 않아요.');
+    } catch (err) {
+      Alert.alert('신고 실패', (err as Error).message);
+    }
   }
 }
 

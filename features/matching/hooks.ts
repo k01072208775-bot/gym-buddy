@@ -60,3 +60,16 @@ export function useUnmatch() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.matches }),
   });
 }
+
+/**
+ * 누군가를 차단한 직후 호출하세요.
+ * 차단한 사람은 후보 목록과 매칭 목록 양쪽에서 사라져야 하므로 둘 다 비웁니다.
+ */
+export function useRefreshMatching() {
+  const queryClient = useQueryClient();
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.candidates }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.matches }),
+    ]);
+}
