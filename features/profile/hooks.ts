@@ -39,3 +39,30 @@ export function useSaveProfile() {
     },
   });
 }
+
+/**
+ * 프로필 사진 업로드.
+ * 스토리지에 올리는 것만으로는 화면에 보이지 않으므로
+ * profiles.avatar_url 갱신까지 한 번에 처리합니다.
+ */
+export function useUploadAvatar() {
+  const queryClient = useQueryClient();
+  const { session } = useSession();
+
+  return useMutation({
+    mutationFn: async (localUri: string) => {
+      const userId = session?.user.id;
+      if (!userId) throw new Error('로그인이 필요합니다.');
+
+      const avatarUrl = await api.uploadAvatar(userId, localUri);
+      await api.setAvatarUrl(userId, avatarUrl);
+      return avatarUrl;
+    },
+    onSuccess: () => {
+      // 내 프로필뿐 아니라 남에게 보이는 목록에도 사진이 반영돼야 한다
+      queryClient.invalidateQueries({ queryKey: queryKeys.myProfile });
+      queryClient.invalidateQueries({ queryKey: queryKeys.candidates });
+      queryClient.invalidateQueries({ queryKey: queryKeys.matches });
+    },
+  });
+}

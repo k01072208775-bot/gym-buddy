@@ -73,3 +73,12 @@ export async function setActive(userId: string, isActive: boolean): Promise<void
     .eq('id', userId);
   if (error) throw error;
 }
+
+/** 업로드한 사진 주소를 프로필에 기록합니다 (uploadAvatar 직후에 호출) */
+export async function setAvatarUrl(userId: string, avatarUrl: string): Promise<void> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ avatar_url: avatarUrl })
+    .eq('id', userId);
+  if (error) throw error;
+}

@@ -46,6 +46,10 @@ export default function RootLayout() {
                 name="board/write"
                 options={{ headerShown: true, title: '글쓰기' }}
               />
+              <Stack.Screen
+                name="profile/edit"
+                options={{ headerShown: true, title: '프로필 수정' }}
+              />
             </Stack>
           </AuthGate>
           <StatusBar style="light" />
