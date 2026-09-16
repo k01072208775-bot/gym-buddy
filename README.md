@@ -40,19 +40,21 @@ app/                     ← 라우팅 전용. 화면 조립만 하고 로직은
 ├── (auth)/                로그인, 온보딩
 ├── (tabs)/                탐색 / 매칭 / 게시판 / 내 프로필
 ├── chat/[matchId].tsx     1:1 채팅
-└── board/
-    ├── [postId].tsx       게시글 상세 + 댓글
-    └── write.tsx          글쓰기 / 글 수정
+├── board/
+│   ├── [postId].tsx       게시글 상세 + 댓글
+│   └── write.tsx          글쓰기 / 글 수정
+└── profile/edit.tsx       프로필 수정 (사진 업로드 포함)
 
 features/                ← 기능 단위로 자른다 (화면 단위가 아님)
 ├── auth/     api.ts       로그인·로그아웃
-├── profile/  api.ts hooks.ts
+├── profile/  api.ts hooks.ts + profile-form.tsx(온보딩·수정 공용 폼) avatar-picker.tsx
 ├── matching/ api.ts hooks.ts
 ├── chat/     api.ts
 ├── board/    api.ts hooks.ts   게시판 (자유 / 운동 / 장터)
 └── safety/   api.ts       신고·차단
 
 components/ui/           ← 기능과 무관한 공용 컴포넌트 (report-reason-modal = 신고 사유 선택)
+                            한 기능에서만 쓰는 컴포넌트는 그 features/<기능>/ 안에 둔다
 constants/               ← theme.ts(색상표), workout.ts(운동 종목·시간대), board.ts(게시판 종류)
 hooks/                   ← use-app-colors.ts (라이트/다크 색상)
 lib/                     ← 앱 전체 인프라 (supabase 클라이언트, 세션, 쿼리 캐시, format.ts)
@@ -74,29 +76,42 @@ supabase/migrations/     ← DB 설계도 (SQL)
 
 ## 3. 아직 안 한 것
 
-### 다음에 이어서 할 순서 (2026-09-15 기준)
+### 다음에 이어서 할 순서 (2026-09-16 기준)
 
 지금까지: 게시판(자유/운동/장터, 운동 종목 분류), SDK 57 업그레이드, "스포츠형" 디자인 기본 틀,
 게시판 목록 화면만 새 디자인 적용. Supabase 에 0001~0004 실행 완료.
+신고 사유 선택을 전 화면에 적용, 프로필 수정 + 프로필 사진 업로드까지 완료.
 
-1. 탐색 · 채팅 화면에 신고 사유 선택 붙이기 (`report-reason-modal.tsx` 재사용)
-2. 프로필 수정 + 프로필 사진 올리기 (새 디자인으로)
-3. 학교 이메일 실제 인증 + 비밀번호 찾기 (SMTP 연결)
-4. 이용약관 · 개인정보처리방침 + 가입 시 동의
-5. 푸시 알림
-6. 대회 기능
+1. 학교 이메일 실제 인증 + 비밀번호 찾기 (SMTP 연결)
+2. 이용약관 · 개인정보처리방침 + 가입 시 동의
+3. 푸시 알림
+4. 대회 기능
 - 나머지 화면(탐색/매칭/채팅/프로필/로그인/온보딩)은 색만 바뀌었고 배치는 새 디자인으로 다듬어야 함
 
 ### 다른 컴퓨터에서 다시 시작할 때
 
-1. Node.js LTS 설치 → 이 폴더에서 `npm install`
-2. `npx expo login` (Expo 계정) → `npx expo start --tunnel`
-3. 폰 Expo Go 도 같은 계정으로 로그인 후 접속
+1. Node.js LTS 설치
+2. `git clone https://github.com/k01072208775-bot/gym-buddy.git` → 그 폴더에서 `npm install`
+3. **`.env.local` 을 직접 만든다** — Supabase 키가 들어 있어 git 에 올라가지 않습니다.
+   `.env.example` 을 복사해 실제 값을 채우세요. 이 파일이 없으면 로그인부터 안 됩니다.
+4. `npx expo start --tunnel` → 터미널의 QR 을 폰 Expo Go 로 찍습니다
 
-- [ ] 프로필 사진 업로드 화면 (`features/profile/api.ts` 의 `uploadAvatar` 는 준비됨)
-- [ ] 프로필 수정 화면 (온보딩 폼을 재사용하면 됨)
-- [ ] 탐색 화면·채팅에도 신고 사유 선택 적용 (`components/ui/report-reason-modal.tsx` — 게시판에는 적용됨)
-- [ ] 게시판 사진 첨부 (특히 장터)
+`npx expo login` 은 안 해도 됩니다. 하면 Expo Go 첫 화면에 프로젝트가 자동으로 뜨는 편의만 생깁니다.
+
+### 작업한 걸 저장하고 올릴 때
+
+```bash
+git add -A
+git commit -m "무엇을 했는지"
+git push
+```
+
+망쳤을 때 마지막 커밋으로 되돌리기: `git restore .`
+
+- [x] 프로필 사진 업로드 (512px JPEG 로 줄여서 올림 — 원본은 1.4MB 씩 됩니다)
+- [x] 프로필 수정 화면 (`features/profile/profile-form.tsx` 를 온보딩과 공유)
+- [x] 탐색 화면·채팅에도 신고 사유 선택 적용
+- [ ] 게시판 사진 첨부 (특히 장터) — `uploadAvatar` 와 같은 방식으로 올리면 됩니다
 - [ ] 운동게시판 종목 태그 / 게시글 검색
 - [ ] 대회 기능 화면 전체 (DB는 `0002_competitions.sql` 로 준비됨)
 - [ ] 이용약관 / 개인정보처리방침 페이지 — **스토어 등록 필수**
