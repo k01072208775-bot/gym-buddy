@@ -1,3 +1,4 @@
+import { uploadImage } from '@/lib/image-upload';
 import { getCurrentUserId } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import type { BoardType, CommentItem, PostItem, TradeStatus } from '@/types/database';
@@ -12,7 +13,29 @@ export type PostInput = {
   price: number | null;
   /** 운동게시판만. 다른 게시판은 null */
   sport: string | null;
+  /** 이미 업로드가 끝난 사진들의 공개 URL. 최대 4장 */
+  imageUrls: string[];
 };
+
+/** 한 글에 붙일 수 있는 사진 수. DB 제약(posts_image_urls_max)과 같은 값이어야 합니다 */
+export const MAX_POST_IMAGES = 4;
+
+/**
+ * 게시글 사진 업로드.
+ * 글을 저장하기 전에 올리므로 경로에 글 id 를 쓸 수 없어 시각 + 난수로 이름을 만듭니다.
+ * (글을 쓰다 그만두면 올린 사진만 남습니다 — 용량이 문제가 되면 나중에 청소하세요)
+ */
+export async function uploadPostImage(localUri: string): Promise<string> {
+  const me = await getCurrentUserId();
+  const name = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+  return uploadImage({
+    bucket: 'post-images',
+    path: me + '/' + name,
+    localUri,
+    // 글 상세에서 크게 보므로 프로필 사진보다 넉넉하게
+    maxWidth: 1080,
+  });
+}
 
 /**
  * 글 목록. 같은 학교 / 차단 제외 필터는 전부 DB의 get_posts 안에 있습니다.
@@ -52,6 +75,7 @@ export async function createPost(input: PostInput): Promise<number> {
       body: input.body.trim(),
       price: input.board === 'market' ? input.price : null,
       sport: input.board === 'workout' ? input.sport : null,
+      image_urls: input.imageUrls,
     })
     .select('id')
     .single();
@@ -68,6 +92,7 @@ export async function updatePost(postId: number, input: PostInput): Promise<void
       body: input.body.trim(),
       price: input.board === 'market' ? input.price : null,
       sport: input.board === 'workout' ? input.sport : null,
+      image_urls: input.imageUrls,
     })
     .eq('id', postId);
   if (error) throw error;

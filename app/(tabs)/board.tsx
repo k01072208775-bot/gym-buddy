@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -152,29 +153,35 @@ function PostRow({
     <Pressable
       onPress={onPress}
       style={[styles.row, { borderTopColor: colors.border }, sold && styles.sold]}>
-      {label ? (
-        <Text style={[Typography.label, { color: sold ? colors.textMuted : colors.primary }]}>
-          {label}
+      <View style={styles.rowText}>
+        {label ? (
+          <Text style={[Typography.label, { color: sold ? colors.textMuted : colors.primary }]}>
+            {label}
+          </Text>
+        ) : null}
+
+        <Text style={[Typography.heading, { color: colors.text }]} numberOfLines={1}>
+          {post.title}
         </Text>
+
+        {isMarket ? (
+          <Text style={[styles.price, { color: colors.text }]}>{formatPrice(post.price!)}</Text>
+        ) : (
+          <Text style={[styles.preview, { color: colors.textMuted }]} numberOfLines={1}>
+            {post.body}
+          </Text>
+        )}
+
+        <Text style={[Typography.caption, { color: colors.textMuted }]}>
+          {post.author_nickname} · {formatRelativeTime(post.created_at)}
+          {post.like_count > 0 ? ` · 좋아요 ${post.like_count}` : ''}
+          {post.comment_count > 0 ? ` · 댓글 ${post.comment_count}` : ''}
+        </Text>
+      </View>
+
+      {post.image_urls.length > 0 ? (
+        <Image source={{ uri: post.image_urls[0] }} style={styles.thumb} contentFit="cover" />
       ) : null}
-
-      <Text style={[Typography.heading, { color: colors.text }]} numberOfLines={1}>
-        {post.title}
-      </Text>
-
-      {isMarket ? (
-        <Text style={[styles.price, { color: colors.text }]}>{formatPrice(post.price!)}</Text>
-      ) : (
-        <Text style={[styles.preview, { color: colors.textMuted }]} numberOfLines={1}>
-          {post.body}
-        </Text>
-      )}
-
-      <Text style={[Typography.caption, { color: colors.textMuted }]}>
-        {post.author_nickname} · {formatRelativeTime(post.created_at)}
-        {post.like_count > 0 ? ` · 좋아요 ${post.like_count}` : ''}
-        {post.comment_count > 0 ? ` · 댓글 ${post.comment_count}` : ''}
-      </Text>
     </Pressable>
   );
 }
@@ -190,11 +197,15 @@ const styles = StyleSheet.create({
   emptyText: { textAlign: 'center', lineHeight: 22 },
   list: { paddingBottom: 96, flexGrow: 1 },
   row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
     paddingHorizontal: Spacing.lg,
     paddingVertical: 14,
-    gap: 3,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
+  rowText: { flex: 1, gap: 3 },
+  thumb: { width: 64, height: 64, borderRadius: Radius.md },
   sold: { opacity: 0.5 },
   preview: { fontSize: 14 },
   price: { fontSize: 15, fontWeight: '800' },

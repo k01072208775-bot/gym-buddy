@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -214,6 +215,14 @@ export default function PostDetailScreen() {
               </View>
             ) : null}
 
+            {post.image_urls.length > 0 ? (
+              <View style={styles.images}>
+                {post.image_urls.map((url) => (
+                  <Image key={url} source={{ uri: url }} style={styles.image} contentFit="cover" transition={150} />
+                ))}
+              </View>
+            ) : null}
+
             <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
 
             <View style={styles.actions}>
@@ -313,6 +322,8 @@ const styles = StyleSheet.create({
   price: { fontSize: 20, fontWeight: '700' },
   statusRow: { flexDirection: 'row', gap: 6 },
   status: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  images: { gap: 8, marginTop: 8 },
+  image: { width: '100%', aspectRatio: 4 / 3, borderRadius: 12 },
   body: { fontSize: 15, lineHeight: 23, marginTop: 8 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
   like: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },

@@ -94,6 +94,8 @@ export type Post = {
   university: string;
   title: string;
   body: string;
+  /** 첨부 사진 공개 URL. 최대 4장 (0005_post_images.sql) */
+  image_urls: string[];
   /** 장터게시판만. 0 = 나눔 */
   price: number | null;
   trade_status: TradeStatus | null;

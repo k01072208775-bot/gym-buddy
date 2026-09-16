@@ -16,6 +16,7 @@ import { ChoiceChips } from '@/components/ui/choice-chips';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { BOARDS, isBoardType, WORKOUT_SPORTS } from '@/constants/board';
 import { usePost, useSavePost } from '@/features/board/hooks';
+import { PostImagePicker } from '@/features/board/post-image-picker';
 import { useAppColors } from '@/hooks/use-app-colors';
 import type { BoardType, PostItem } from '@/types/database';
 
@@ -79,6 +80,7 @@ function PostForm({
   const [title, setTitle] = useState(initial?.title ?? '');
   const [body, setBody] = useState(initial?.body ?? '');
   const [price, setPrice] = useState(initial?.price != null ? String(initial.price) : '');
+  const [imageUrls, setImageUrls] = useState<string[]>(initial?.image_urls ?? []);
 
   const isMarket = board === 'market';
   const isWorkout = board === 'workout';
@@ -99,6 +101,7 @@ function PostForm({
           body,
           price: isMarket ? Number(price) : null,
           sport: isWorkout ? sport : null,
+          imageUrls,
         },
       },
       {
@@ -169,6 +172,8 @@ function PostForm({
           multiline
           textAlignVertical="top"
         />
+
+        <PostImagePicker urls={imageUrls} onChange={setImageUrls} />
 
         <Text style={[styles.hint, { color: colors.textMuted }]}>
           같은 학교 학생에게만 보여요. 욕설·비방·거래 사기 글은 신고되면 제재될 수 있어요.

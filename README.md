@@ -11,7 +11,7 @@
 
 1. https://supabase.com 에서 프로젝트 생성 (Region: **Northeast Asia (Seoul)**)
 2. **SQL Editor** 에 `supabase/migrations/0001_init.sql` 붙여넣고 Run
-3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql` 도 순서대로 Run
+3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql` 도 순서대로 Run
 4. **Project Settings → API** 에서 Project URL 과 `anon` public key 복사
 
 ### 2) 환경변수
@@ -57,7 +57,8 @@ components/ui/           ← 기능과 무관한 공용 컴포넌트 (report-rea
                             한 기능에서만 쓰는 컴포넌트는 그 features/<기능>/ 안에 둔다
 constants/               ← theme.ts(색상표), workout.ts(운동 종목·시간대), board.ts(게시판 종류)
 hooks/                   ← use-app-colors.ts (라이트/다크 색상)
-lib/                     ← 앱 전체 인프라 (supabase 클라이언트, 세션, 쿼리 캐시, format.ts)
+lib/                     ← 앱 전체 인프라 (supabase 클라이언트, 세션, 쿼리 캐시, format.ts,
+                            image-upload.ts = 사진 줄여서 올리기 — 프로필·게시판 공용)
 types/database.ts        ← DB 스키마 타입
 supabase/migrations/     ← DB 설계도 (SQL)
 ```
@@ -79,7 +80,7 @@ supabase/migrations/     ← DB 설계도 (SQL)
 ### 다음에 이어서 할 순서 (2026-09-16 기준)
 
 지금까지: 게시판(자유/운동/장터, 운동 종목 분류), SDK 57 업그레이드, "스포츠형" 디자인 기본 틀,
-게시판 목록 화면만 새 디자인 적용. Supabase 에 0001~0004 실행 완료.
+게시판 목록 화면만 새 디자인 적용. Supabase 에 0001~0005 실행 완료.
 신고 사유 선택을 전 화면에 적용, 프로필 수정 + 프로필 사진 업로드까지 완료.
 
 1. 학교 이메일 실제 인증 + 비밀번호 찾기 (SMTP 연결)
@@ -111,7 +112,7 @@ git push
 - [x] 프로필 사진 업로드 (512px JPEG 로 줄여서 올림 — 원본은 1.4MB 씩 됩니다)
 - [x] 프로필 수정 화면 (`features/profile/profile-form.tsx` 를 온보딩과 공유)
 - [x] 탐색 화면·채팅에도 신고 사유 선택 적용
-- [ ] 게시판 사진 첨부 (특히 장터) — `uploadAvatar` 와 같은 방식으로 올리면 됩니다
+- [x] 게시판 사진 첨부 (글당 4장, 목록에 썸네일) — `0005_post_images.sql` 실행 필요
 - [ ] 운동게시판 종목 태그 / 게시글 검색
 - [ ] 대회 기능 화면 전체 (DB는 `0002_competitions.sql` 로 준비됨)
 - [ ] 이용약관 / 개인정보처리방침 페이지 — **스토어 등록 필수**

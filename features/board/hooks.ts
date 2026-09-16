@@ -141,3 +141,8 @@ function invalidatePostAndComments(queryClient: ReturnType<typeof useQueryClient
   queryClient.invalidateQueries({ queryKey: queryKeys.post(postId) });
   queryClient.invalidateQueries({ queryKey: queryKeys.allPosts });
 }
+
+/** 게시글 사진 업로드. 고른 즉시 올리고 글 저장 때 URL 만 함께 보냅니다. */
+export function useUploadPostImage() {
+  return useMutation({ mutationFn: api.uploadPostImage });
+}
