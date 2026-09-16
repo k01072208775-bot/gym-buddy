@@ -1,0 +1,143 @@
+# gym-buddy
+
+같은 학교 학생끼리 운동 파트너를 찾는 앱. **Expo SDK 57** (React Native 0.86) + Supabase.
+
+> 2026-09-15 에 SDK 54 → 57 로 올렸습니다. 아이폰 Expo Go 는 최신 SDK(57)만 지원하고
+> 예전 버전을 설치할 수 없기 때문입니다. 테스트 폰의 Expo Go 도 최신으로 업데이트하세요.
+
+## 1. 처음 실행하기
+
+### 1) Supabase
+
+1. https://supabase.com 에서 프로젝트 생성 (Region: **Northeast Asia (Seoul)**)
+2. **SQL Editor** 에 `supabase/migrations/0001_init.sql` 붙여넣고 Run
+3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql` 도 순서대로 Run
+4. **Project Settings → API** 에서 Project URL 과 `anon` public key 복사
+
+### 2) 환경변수
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` 에 위 값을 넣습니다.
+`service_role` key 는 **절대** 넣지 마세요. 앱 번들에 그대로 박혀서 DB 전체가 열립니다.
+
+### 3) 실행
+
+```bash
+npx expo start --tunnel
+```
+
+폰의 **Expo Go** 앱에서 "Enter URL manually" 로 터널 주소를 입력합니다.
+같은 공유기를 쓰는 환경이면 `--tunnel` 없이 `npm start` 로도 됩니다.
+
+## 2. 폴더 구조
+
+```
+app/                     ← 라우팅 전용. 화면 조립만 하고 로직은 넣지 않는다
+├── _layout.tsx            Provider 등록 + 로그인/온보딩 분기 (AuthGate)
+├── (auth)/                로그인, 온보딩
+├── (tabs)/                탐색 / 매칭 / 게시판 / 내 프로필
+├── chat/[matchId].tsx     1:1 채팅
+└── board/
+    ├── [postId].tsx       게시글 상세 + 댓글
+    └── write.tsx          글쓰기 / 글 수정
+
+features/                ← 기능 단위로 자른다 (화면 단위가 아님)
+├── auth/     api.ts       로그인·로그아웃
+├── profile/  api.ts hooks.ts
+├── matching/ api.ts hooks.ts
+├── chat/     api.ts
+├── board/    api.ts hooks.ts   게시판 (자유 / 운동 / 장터)
+└── safety/   api.ts       신고·차단
+
+components/ui/           ← 기능과 무관한 공용 컴포넌트 (report-reason-modal = 신고 사유 선택)
+constants/               ← theme.ts(색상표), workout.ts(운동 종목·시간대), board.ts(게시판 종류)
+hooks/                   ← use-app-colors.ts (라이트/다크 색상)
+lib/                     ← 앱 전체 인프라 (supabase 클라이언트, 세션, 쿼리 캐시, format.ts)
+types/database.ts        ← DB 스키마 타입
+supabase/migrations/     ← DB 설계도 (SQL)
+```
+
+### 지켜야 할 규칙 4개
+
+1. **`app/` 안의 파일은 화면 조립만.** 20줄 넘게 로직이 생기면 `features/` 로 옮긴다.
+2. **컴포넌트에서 `supabase.from(...)` 을 직접 호출하지 않는다.**
+   모든 쿼리는 `features/<기능>/api.ts` 안에만 둔다.
+3. **화면에 `#97C459` 같은 색상값이나 제멋대로의 크기를 직접 적지 않는다.**
+   색은 `useAppColors()`, 글자 크기·여백·모서리는 `constants/theme.ts` 의
+   `Typography` / `Spacing` / `Radius` 를 쓴다. 디자인은 "스포츠형" (어두운 배경 + 형광 연두).
+4. **`features/A` 가 `features/B` 를 import 하지 않는다.**
+   공유가 필요하면 `lib/` 또는 `components/ui/` 로 올린다.
+   (그래서 세션 관리가 `features/auth` 가 아니라 `lib/session.tsx` 에 있습니다)
+
+## 3. 아직 안 한 것
+
+### 다음에 이어서 할 순서 (2026-09-15 기준)
+
+지금까지: 게시판(자유/운동/장터, 운동 종목 분류), SDK 57 업그레이드, "스포츠형" 디자인 기본 틀,
+게시판 목록 화면만 새 디자인 적용. Supabase 에 0001~0004 실행 완료.
+
+1. 탐색 · 채팅 화면에 신고 사유 선택 붙이기 (`report-reason-modal.tsx` 재사용)
+2. 프로필 수정 + 프로필 사진 올리기 (새 디자인으로)
+3. 학교 이메일 실제 인증 + 비밀번호 찾기 (SMTP 연결)
+4. 이용약관 · 개인정보처리방침 + 가입 시 동의
+5. 푸시 알림
+6. 대회 기능
+- 나머지 화면(탐색/매칭/채팅/프로필/로그인/온보딩)은 색만 바뀌었고 배치는 새 디자인으로 다듬어야 함
+
+### 다른 컴퓨터에서 다시 시작할 때
+
+1. Node.js LTS 설치 → 이 폴더에서 `npm install`
+2. `npx expo login` (Expo 계정) → `npx expo start --tunnel`
+3. 폰 Expo Go 도 같은 계정으로 로그인 후 접속
+
+- [ ] 프로필 사진 업로드 화면 (`features/profile/api.ts` 의 `uploadAvatar` 는 준비됨)
+- [ ] 프로필 수정 화면 (온보딩 폼을 재사용하면 됨)
+- [ ] 탐색 화면·채팅에도 신고 사유 선택 적용 (`components/ui/report-reason-modal.tsx` — 게시판에는 적용됨)
+- [ ] 게시판 사진 첨부 (특히 장터)
+- [ ] 운동게시판 종목 태그 / 게시글 검색
+- [ ] 대회 기능 화면 전체 (DB는 `0002_competitions.sql` 로 준비됨)
+- [ ] 이용약관 / 개인정보처리방침 페이지 — **스토어 등록 필수**
+- [ ] 푸시 알림 (매칭 성사 / 새 메시지)
+
+## 4. 스토어 출시 전 체크리스트
+
+매칭 앱은 사용자 생성 콘텐츠(UGC) 앱이라 Apple App Review 1.2 조항이 적용됩니다.
+아래가 없으면 리젝됩니다.
+
+- [x] 신고 기능 (`features/safety`)
+- [x] 차단 기능 (`features/safety`)
+- [ ] 가입 시 이용약관 동의 절차
+- [ ] 신고 접수 후 24시간 내 처리 — `reports` 테이블의 `status = 'pending'` 을 매일 확인
+- [ ] 개인정보처리방침 URL
+
+## 5. 게시판 규칙 (`0003_boards.sql`)
+
+- **같은 학교 학생 글만 보인다.** 글의 `university` 는 앱이 아니라 DB 트리거가 작성자 프로필에서 채운다.
+- **차단하면 서로의 글·댓글이 사라진다.** (`get_posts` / `get_comments` 와 RLS 양쪽에서 거름)
+- **좋아요 수·댓글 수는 앱이 못 바꾼다.** `post_likes` / `post_comments` 트리거만 변경.
+- 장터 글만 `price`, `trade_status` 를 가진다 (DB check 제약).
+- 게시글·댓글 신고는 `reports.post_id` / `reports.comment_id` 에 기록된다.
+- 게시판 추가: `alter type board_type add value '...'` 를 새 마이그레이션으로 → `constants/board.ts` 에 추가.
+
+## 6. 대회 기능 (참가비) 주의사항
+
+`0002_competitions.sql` 에 오프라인 대회 + 참가비 스키마가 들어 있습니다.
+돈이 걸리는 기능이라 아래 세 가지가 DB 제약으로 잠겨 있습니다. 풀지 마세요.
+
+1. **참가비 금액을 앱이 정하지 못한다** — RLS가 대회에 적힌 `entry_fee` 와 대조
+2. **결제 상태를 앱이 바꾸지 못한다** — `payments` 에 INSERT/UPDATE 정책 없음 (서버 전용)
+3. **상금 비율 상한 70%** — 참가비 전액을 상금으로 돌리면 사행성 논란 소지
+
+실제 운영 전 준비: 사업자등록(PG 계약 조건), 환불 규정 문구, 상금 원천징수 세무 확인.
+
+## 7. 스키마를 바꿨을 때
+
+`supabase/migrations/` 에 `0003_xxx.sql` 로 새 파일을 추가하고 (기존 파일 수정 X),
+SQL Editor 에서 실행한 뒤 타입을 다시 생성합니다.
+
+```bash
+npx supabase gen types typescript --project-id uhodbbxwjtsxshikwnkd > types/database.ts
+```
