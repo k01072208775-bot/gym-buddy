@@ -15,7 +15,7 @@ import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { TagRow } from '@/components/ui/tag';
 import { Radius, Spacing, Typography, type AppPalette } from '@/constants/theme';
-import { EXPERIENCE_LABELS } from '@/constants/workout';
+import { EXPERIENCE_LABELS, GENDER_LABELS } from '@/constants/workout';
 import { useCandidates, useSwipe } from '@/features/matching/hooks';
 import { useMyProfile } from '@/features/profile/hooks';
 import { reportAndBlock } from '@/features/safety/api';
@@ -139,7 +139,9 @@ function CandidateCard({
         <View style={styles.who}>
           <Text style={[Typography.title, { color: colors.text }]} numberOfLines={1}>
             {candidate.nickname}
-            <Text style={[Typography.body, { color: colors.textMuted }]}>  {age}세</Text>
+            <Text style={[Typography.body, { color: colors.textMuted }]}>
+              {`  ${age}세 · ${GENDER_LABELS[candidate.gender]}`}
+            </Text>
           </Text>
           <Text style={[Typography.caption, { color: colors.textMuted }]} numberOfLines={1}>
             {place}
