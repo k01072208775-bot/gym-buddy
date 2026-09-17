@@ -11,7 +11,7 @@
 
 1. https://supabase.com 에서 프로젝트 생성 (Region: **Northeast Asia (Seoul)**)
 2. **SQL Editor** 에 `supabase/migrations/0001_init.sql` 붙여넣고 Run
-3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql` 도 순서대로 Run
+3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql`, `0006_likes_received.sql` 도 순서대로 Run
 4. **Project Settings → API** 에서 Project URL 과 `anon` public key 복사
 
 ### 2) 환경변수
@@ -85,7 +85,7 @@ supabase/migrations/     ← DB 설계도 (SQL)
 
 1. 학교 이메일 실제 인증 + 비밀번호 찾기 (SMTP 연결)
 2. 이용약관 · 개인정보처리방침 + 가입 시 동의
-3. 푸시 알림
+3. 푸시 알림 — 지금은 앱 안 배지만 있음. 안드로이드 Expo Go 에서는 원격 푸시를 받을 수 없어 개발용 빌드가 필요
 4. 대회 기능
 - 나머지 화면(탐색/매칭/채팅/프로필/로그인/온보딩)은 색만 바뀌었고 배치는 새 디자인으로 다듬어야 함
 
@@ -112,6 +112,7 @@ git push
 - [x] 프로필 사진 업로드 (512px JPEG 로 줄여서 올림 — 원본은 1.4MB 씩 됩니다)
 - [x] 프로필 수정 화면 (`features/profile/profile-form.tsx` 를 온보딩과 공유)
 - [x] 탐색 화면·채팅에도 신고 사유 선택 적용
+- [x] 받은 관심 — 나에게 '같이 운동해요'를 보낸 사람을 매칭 탭에서 수락/거절 (`0006`), 탭 배지로 알림
 - [x] 게시판 사진 첨부 (글당 4장, 목록에 썸네일) — `0005_post_images.sql` 실행 필요
 - [ ] 운동게시판 종목 태그 / 게시글 검색
 - [ ] 대회 기능 화면 전체 (DB는 `0002_competitions.sql` 로 준비됨)

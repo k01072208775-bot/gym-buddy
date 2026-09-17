@@ -1,9 +1,13 @@
 import { Tabs } from 'expo-router';
 
+import { useLikesReceived } from '@/features/matching/hooks';
 import { useAppColors } from '@/hooks/use-app-colors';
 
 export default function TabsLayout() {
   const colors = useAppColors();
+  // 푸시 알림 대신: 나에게 관심을 보낸 사람 수를 매칭 탭에 연두색 숫자로 띄운다
+  const { data: likes } = useLikesReceived();
+  const likeCount = likes?.length ?? 0;
 
   return (
     <Tabs
@@ -19,7 +23,14 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.textMuted,
       }}>
       <Tabs.Screen name="index" options={{ title: '탐색' }} />
-      <Tabs.Screen name="matches" options={{ title: '매칭' }} />
+      <Tabs.Screen
+        name="matches"
+        options={{
+          title: '매칭',
+          tabBarBadge: likeCount > 0 ? likeCount : undefined,
+          tabBarBadgeStyle: { backgroundColor: colors.primary, color: colors.onPrimary, fontWeight: '800' },
+        }}
+      />
       <Tabs.Screen name="board" options={{ title: '게시판' }} />
       <Tabs.Screen name="profile" options={{ title: '내 프로필' }} />
     </Tabs>

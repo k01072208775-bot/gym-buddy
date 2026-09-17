@@ -1,6 +1,6 @@
 import { getCurrentUserId } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
-import type { Candidate, Profile, SwipeAction } from '@/types/database';
+import type { Candidate, LikeReceived, Profile, SwipeAction } from '@/types/database';
 
 export type MatchWithPartner = {
   matchId: number;
@@ -46,6 +46,17 @@ export async function swipe(
   if (matchError) throw matchError;
 
   return { matched: !!data, matchId: data?.id };
+}
+
+/**
+ * 나에게 '같이 운동해요'를 보낸 사람 중 아직 답하지 않은 사람.
+ * 수락은 swipe(id, 'like'), 거절은 swipe(id, 'pass') 로 그대로 처리됩니다.
+ * 누가 나를 pass 했는지는 DB 가 절대 돌려주지 않습니다 (0006_likes_received.sql).
+ */
+export async function fetchLikesReceived(): Promise<LikeReceived[]> {
+  const { data, error } = await supabase.rpc('get_likes_received', {});
+  if (error) throw error;
+  return data ?? [];
 }
 
 /** 성사된 매칭 목록 + 상대방 프로필 */

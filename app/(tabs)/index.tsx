@@ -3,19 +3,16 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 
-import { Avatar } from '@/components/ui/avatar';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
-import { TagRow } from '@/components/ui/tag';
-import { Radius, Spacing, Typography, type AppPalette } from '@/constants/theme';
-import { EXPERIENCE_LABELS, GENDER_LABELS } from '@/constants/workout';
+import { Spacing, Typography } from '@/constants/theme';
+import { CandidateCard } from '@/features/matching/candidate-card';
 import { useCandidates, useSwipe } from '@/features/matching/hooks';
 import { useMyProfile } from '@/features/profile/hooks';
 import { reportAndBlock } from '@/features/safety/api';
@@ -66,7 +63,6 @@ export default function DiscoverScreen() {
             <CandidateCard
               candidate={item}
               mySports={mySports}
-              colors={colors}
               onLike={() => handleSwipe(item, 'like')}
               onPass={() => handleSwipe(item, 'pass')}
               onReport={() => setReportTarget(item)}
@@ -112,87 +108,9 @@ export default function DiscoverScreen() {
   }
 }
 
-function CandidateCard({
-  candidate,
-  mySports,
-  colors,
-  onLike,
-  onPass,
-  onReport,
-}: {
-  candidate: Candidate;
-  mySports: string[];
-  colors: AppPalette;
-  onLike: () => void;
-  onPass: () => void;
-  onReport: () => void;
-}) {
-  const age = new Date().getFullYear() - candidate.birth_year + 1;
-  const place = [EXPERIENCE_LABELS[candidate.experience], candidate.gym_name]
-    .filter(Boolean)
-    .join(' · ');
-
-  return (
-    <View style={[styles.card, { backgroundColor: colors.card }]}>
-      <View style={styles.cardHeader}>
-        <Avatar url={candidate.avatar_url} name={candidate.nickname} size={56} />
-        <View style={styles.who}>
-          <Text style={[Typography.title, { color: colors.text }]} numberOfLines={1}>
-            {candidate.nickname}
-            <Text style={[Typography.body, { color: colors.textMuted }]}>
-              {`  ${age}세 · ${GENDER_LABELS[candidate.gender]}`}
-            </Text>
-          </Text>
-          <Text style={[Typography.caption, { color: colors.textMuted }]} numberOfLines={1}>
-            {place}
-          </Text>
-        </View>
-        <Pressable onPress={onReport} hitSlop={12} style={styles.report}>
-          <Text style={[Typography.caption, { color: colors.textMuted }]}>신고</Text>
-        </Pressable>
-      </View>
-
-      {candidate.shared_sports > 0 ? (
-        <Text style={[Typography.label, { color: colors.primary }]}>
-          겹치는 운동 {candidate.shared_sports}개
-        </Text>
-      ) : null}
-
-      {/* 나와 겹치는 종목은 연두색으로 칠해서 숫자만 보고 뭔지 모르는 일이 없게 한다 */}
-      <TagRow labels={candidate.sports} highlight={mySports} />
-
-      <Text style={[Typography.caption, { color: colors.textMuted }]}>
-        {candidate.time_slots.join(' · ')}
-      </Text>
-
-      {candidate.bio ? (
-        <Text style={[Typography.body, { color: colors.text }]}>{candidate.bio}</Text>
-      ) : null}
-
-      <View style={styles.actions}>
-        <Pressable style={[styles.action, styles.pass, { backgroundColor: colors.chip }]} onPress={onPass}>
-          <Text style={[styles.actionText, { color: colors.text }]}>패스</Text>
-        </Pressable>
-        <Pressable style={[styles.action, styles.like, { backgroundColor: colors.primary }]} onPress={onLike}>
-          <Text style={[styles.actionText, { color: colors.onPrimary }]}>같이 운동해요</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   emptyText: { ...Typography.body, textAlign: 'center' },
   list: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm, paddingBottom: Spacing.xl, gap: Spacing.md, flexGrow: 1 },
-  card: { borderRadius: Radius.lg, padding: Spacing.lg, gap: Spacing.md },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  who: { flex: 1, gap: 2 },
-  report: { alignSelf: 'flex-start' },
-  actions: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.xs },
-  action: { borderRadius: Radius.md, paddingVertical: 14, alignItems: 'center' },
-  pass: { flex: 1 },
-  like: { flex: 2 },
-  actionText: { fontSize: 16, fontWeight: '800' },
 });

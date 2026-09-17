@@ -149,6 +149,11 @@ export type Candidate = {
   shared_slots: number;
 };
 
+/** get_likes_received RPC 가 돌려주는, 나에게 '같이 운동해요'를 보낸 사람 */
+export type LikeReceived = Candidate & {
+  liked_at: string;
+};
+
 type Table<Row, Required extends keyof Row, Generated extends keyof Row = never> = {
   Row: Row;
   Insert: Pick<Row, Required> & Partial<Omit<Row, Required | Generated>>;
@@ -183,6 +188,10 @@ export type Database = {
       get_candidates: {
         Args: { limit_count?: number };
         Returns: Candidate[];
+      };
+      get_likes_received: {
+        Args: { limit_count?: number };
+        Returns: LikeReceived[];
       };
       get_posts: {
         Args: {

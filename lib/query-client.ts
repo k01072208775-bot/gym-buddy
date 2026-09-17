@@ -22,6 +22,7 @@ export const queryKeys = {
   myProfile: ['my-profile'] as const,
   candidates: ['candidates'] as const,
   matches: ['matches'] as const,
+  likesReceived: ['likes-received'] as const,
   messages: (matchId: number) => ['messages', matchId] as const,
   allPosts: ['posts'] as const,
   posts: (board: BoardType, sport: string | null = null) =>
