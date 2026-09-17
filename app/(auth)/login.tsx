@@ -12,11 +12,17 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { isUniversityEmail } from '@/constants/workout';
 import { signInWithPassword, signUpWithPassword, toKoreanAuthError } from '@/features/auth/api';
 import { useAppColors } from '@/hooks/use-app-colors';
 
 type Mode = 'signin' | 'signup';
+
+const MODES: { value: Mode; label: string }[] = [
+  { value: 'signup', label: '회원가입' },
+  { value: 'signin', label: '로그인' },
+];
 
 /**
  * 화면은 "무엇을 보여줄지"만 담당합니다.
@@ -29,10 +35,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const inputStyle = [
-    styles.input,
-    { borderColor: colors.border, color: colors.text, backgroundColor: colors.card },
-  ];
+  const inputStyle = [styles.input, { color: colors.text, backgroundColor: colors.card }];
 
   const valid = email.includes('@') && password.length >= 6;
 
@@ -62,53 +65,65 @@ export default function LoginScreen() {
       <KeyboardAvoidingView
         style={styles.inner}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Text style={[styles.title, { color: colors.text }]}>
-          같이 운동할 사람,{'\n'}우리 학교 안에서
-        </Text>
-
-        <View style={[styles.tabs, { borderColor: colors.border }]}>
-          {(['signup', 'signin'] as Mode[]).map((m) => (
-            <Pressable
-              key={m}
-              onPress={() => setMode(m)}
-              style={[styles.tab, mode === m && { backgroundColor: colors.primary }]}>
-              <Text
-                style={[
-                  styles.tabText,
-                  { color: mode === m ? colors.onPrimary : colors.textMuted },
-                ]}>
-                {m === 'signup' ? '회원가입' : '로그인'}
-              </Text>
-            </Pressable>
-          ))}
+        <View style={styles.hero}>
+          <Text style={[Typography.label, { color: colors.primary }]}>GYM BUDDY</Text>
+          <Text style={[styles.title, { color: colors.text }]}>
+            같이 운동할 사람,{'\n'}
+            <Text style={{ color: colors.primary }}>우리 학교</Text> 안에서
+          </Text>
         </View>
 
-        <Text style={[styles.label, { color: colors.textMuted }]}>학교 이메일</Text>
-        <TextInput
-          style={inputStyle}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="hong@univ.ac.kr"
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-          editable={!busy}
-        />
+        {/* 회원가입 / 로그인 전환. 선택된 쪽만 연두색으로 채운다 */}
+        <View style={[styles.tabs, { backgroundColor: colors.card }]}>
+          {MODES.map((item) => {
+            const active = mode === item.value;
+            return (
+              <Pressable
+                key={item.value}
+                onPress={() => setMode(item.value)}
+                style={[styles.tab, active && { backgroundColor: colors.primary }]}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    { color: active ? colors.onPrimary : colors.textMuted },
+                  ]}>
+                  {item.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
 
-        <Text style={[styles.label, { color: colors.textMuted }]}>비밀번호</Text>
-        <TextInput
-          style={inputStyle}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="6자 이상"
-          placeholderTextColor={colors.textMuted}
-          secureTextEntry
-          autoCapitalize="none"
-          editable={!busy}
-        />
+        <View style={styles.field}>
+          <Text style={[Typography.label, { color: colors.textMuted }]}>학교 이메일</Text>
+          <TextInput
+            style={inputStyle}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="hong@univ.ac.kr"
+            placeholderTextColor={colors.textMuted}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            editable={!busy}
+          />
+        </View>
 
-        <Text style={[styles.hint, { color: colors.textMuted }]}>
+        <View style={styles.field}>
+          <Text style={[Typography.label, { color: colors.textMuted }]}>비밀번호</Text>
+          <TextInput
+            style={inputStyle}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="6자 이상"
+            placeholderTextColor={colors.textMuted}
+            secureTextEntry
+            autoCapitalize="none"
+            editable={!busy}
+          />
+        </View>
+
+        <Text style={[Typography.caption, { color: colors.textMuted }]}>
           {mode === 'signup'
             ? '학교 이메일로 가입하면 같은 학교 학생만 만날 수 있어요.'
             : '가입할 때 쓴 이메일과 비밀번호를 입력해주세요.'}
@@ -127,25 +142,18 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, gap: 10 },
-  title: { fontSize: 28, fontWeight: '700', marginBottom: 24, lineHeight: 38 },
-  tabs: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 4,
-    gap: 4,
-    marginBottom: 8,
-  },
-  tab: { flex: 1, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
-  tabText: { fontSize: 15, fontWeight: '600' },
-  label: { fontSize: 14, fontWeight: '600' },
+  inner: { flex: 1, justifyContent: 'center', paddingHorizontal: Spacing.xl, gap: Spacing.lg },
+  hero: { gap: Spacing.sm, marginBottom: Spacing.md },
+  title: { ...Typography.display, fontSize: 32, lineHeight: 42 },
+  tabs: { flexDirection: 'row', borderRadius: Radius.md, padding: Spacing.xs, gap: Spacing.xs },
+  tab: { flex: 1, borderRadius: Radius.sm, paddingVertical: Spacing.md, alignItems: 'center' },
+  tabText: { fontSize: 15, fontWeight: '800' },
+  field: { gap: Spacing.sm },
   input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: 14,
+    ...Typography.body,
     fontSize: 16,
   },
-  hint: { fontSize: 13, marginBottom: 8 },
 });

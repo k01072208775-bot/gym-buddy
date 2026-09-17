@@ -16,3 +16,13 @@ export function formatRelativeTime(iso: string): string {
 export function formatPrice(price: number): string {
   return price === 0 ? '나눔' : `${price.toLocaleString('ko-KR')}원`;
 }
+
+/** 채팅 메시지 시각. "오후 3:05" */
+export function formatClockTime(iso: string): string {
+  const date = new Date(iso);
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const period = hours < 12 ? '오전' : '오후';
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  return `${period} ${hour12}:${minutes}`;
+}

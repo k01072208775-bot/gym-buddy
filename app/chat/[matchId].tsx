@@ -13,12 +13,14 @@ import {
   View,
 } from 'react-native';
 
+import { Avatar } from '@/components/ui/avatar';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
-import { Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { fetchMessages, sendMessage, subscribeToMessages } from '@/features/chat/api';
 import { useMatches, useRefreshMatching } from '@/features/matching/hooks';
 import { reportAndBlock } from '@/features/safety/api';
 import { useAppColors } from '@/hooks/use-app-colors';
+import { formatClockTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import type { Message } from '@/types/database';
 
@@ -30,7 +32,7 @@ export default function ChatScreen() {
   const { session } = useSession();
   const myId = session?.user.id;
 
-  // 신고 대상은 이 매칭의 상대방. 매칭 목록은 이미 받아둔 캐시라 추가 요청이 없습니다.
+  // 상대방은 이미 받아둔 매칭 목록 캐시에서 찾습니다 (추가 요청 없음)
   const { data: matches } = useMatches();
   const partner = matches?.find((match) => match.matchId === matchId)?.partner;
   const refreshMatching = useRefreshMatching();
@@ -99,9 +101,36 @@ export default function ChatScreen() {
     }
   }
 
+  const header = (
+    <Stack.Screen
+      options={{
+        // 누구와 대화 중인지 보이도록 제목 자리에 상대 사진과 닉네임을 둔다
+        headerTitle: () =>
+          partner ? (
+            <View style={styles.headerTitle}>
+              <Avatar url={partner.avatar_url} name={partner.nickname} size={30} />
+              <Text style={[Typography.heading, { color: colors.text }]} numberOfLines={1}>
+                {partner.nickname}
+              </Text>
+            </View>
+          ) : (
+            <Text style={[Typography.heading, { color: colors.text }]}>채팅</Text>
+          ),
+        // 매칭 목록을 아직 못 받았으면 신고 대상을 알 수 없으므로 버튼을 숨긴다
+        headerRight: () =>
+          partner ? (
+            <Pressable onPress={() => setReportOpen(true)} hitSlop={12}>
+              <Text style={[Typography.body, { color: colors.textMuted }]}>신고</Text>
+            </Pressable>
+          ) : null,
+      }}
+    />
+  );
+
   if (!messages) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
+        {header}
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -112,17 +141,7 @@ export default function ChatScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={90}>
-      <Stack.Screen
-        options={{
-          // 매칭 목록을 아직 못 받았으면 신고 대상을 알 수 없으므로 버튼을 숨긴다
-          headerRight: () =>
-            partner ? (
-              <Pressable onPress={() => setReportOpen(true)} hitSlop={12}>
-                <Text style={[styles.headerButton, { color: colors.primary }]}>신고</Text>
-              </Pressable>
-            ) : null,
-        }}
-      />
+      {header}
 
       <FlatList
         ref={listRef}
@@ -131,23 +150,43 @@ export default function ChatScreen() {
         contentContainerStyle={styles.list}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
         ListEmptyComponent={
-          <Text style={[styles.empty, { color: colors.textMuted }]}>
-            매칭됐어요! 먼저 인사를 건네보세요.
-          </Text>
+          <View style={styles.empty}>
+            {partner ? <Avatar url={partner.avatar_url} name={partner.nickname} size={72} /> : null}
+            <Text style={[Typography.heading, { color: colors.text }]}>매칭됐어요!</Text>
+            <Text style={[Typography.body, { color: colors.textMuted }]}>
+              언제 어디서 운동하는지 먼저 물어보세요.
+            </Text>
+          </View>
         }
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const mine = item.sender_id === myId;
+          const next = messages[index + 1];
+          // 같은 사람이 같은 분에 연달아 보낸 메시지는 마지막 것에만 시간을 붙인다
+          const showTime =
+            !next ||
+            next.sender_id !== item.sender_id ||
+            formatClockTime(next.created_at) !== formatClockTime(item.created_at);
+
           return (
-            <View
-              style={[
-                styles.bubble,
-                mine
-                  ? { alignSelf: 'flex-end', backgroundColor: colors.bubbleMine }
-                  : { alignSelf: 'flex-start', backgroundColor: colors.bubbleTheirs },
-              ]}>
-              <Text style={{ color: mine ? colors.bubbleMineText : colors.bubbleTheirsText }}>
-                {item.body}
-              </Text>
+            <View style={[styles.messageRow, mine && styles.rowMine]}>
+              <View
+                style={[
+                  styles.bubble,
+                  { backgroundColor: mine ? colors.bubbleMine : colors.bubbleTheirs },
+                ]}>
+                <Text
+                  style={[
+                    Typography.body,
+                    { color: mine ? colors.bubbleMineText : colors.bubbleTheirsText },
+                  ]}>
+                  {item.body}
+                </Text>
+              </View>
+              {showTime ? (
+                <Text style={[Typography.caption, styles.time, { color: colors.textMuted }]}>
+                  {formatClockTime(item.created_at)}
+                </Text>
+              ) : null}
             </View>
           );
         }}
@@ -155,10 +194,7 @@ export default function ChatScreen() {
 
       <View style={[styles.composer, { borderTopColor: colors.border }]}>
         <TextInput
-          style={[
-            styles.input,
-            { borderColor: colors.border, color: colors.text, backgroundColor: colors.card },
-          ]}
+          style={[styles.input, { color: colors.text, backgroundColor: colors.card }]}
           value={draft}
           onChangeText={setDraft}
           placeholder="메시지 입력"
@@ -190,26 +226,36 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  headerButton: Typography.heading,
-  list: { padding: 16, gap: 8, flexGrow: 1 },
-  empty: { textAlign: 'center', marginTop: 40 },
-  bubble: { maxWidth: '78%', borderRadius: 16, paddingHorizontal: 14, paddingVertical: 10 },
+  headerTitle: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, maxWidth: 220 },
+  list: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md, gap: Spacing.xs, flexGrow: 1 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.sm, paddingVertical: 60 },
+  // 상대 메시지: [말풍선][시간] 왼쪽 정렬 / 내 메시지: 순서를 뒤집어 [시간][말풍선] 오른쪽 정렬
+  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.xs },
+  rowMine: { flexDirection: 'row-reverse' },
+  bubble: {
+    maxWidth: '75%',
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  time: { marginBottom: 2 },
   composer: {
     flexDirection: 'row',
-    gap: 8,
-    padding: 12,
-    borderTopWidth: 1,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
     alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 16,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: 10,
     maxHeight: 120,
+    ...Typography.body,
   },
-  send: { borderRadius: 20, paddingHorizontal: 18, paddingVertical: 12 },
+  send: { borderRadius: Radius.lg, paddingHorizontal: Spacing.lg, paddingVertical: 11 },
   sendDisabled: { opacity: 0.4 },
-  sendText: { fontWeight: '600' },
+  sendText: { fontSize: 15, fontWeight: '800' },
 });

@@ -45,10 +45,8 @@ export function ProfileForm({
 
   const save = useSaveProfile();
 
-  const inputStyle = [
-    styles.input,
-    { borderColor: colors.border, color: colors.text, backgroundColor: colors.card },
-  ];
+  // 로그인·채팅 입력칸과 같은 모양: 테두리 없이 한 단계 밝은 면
+  const inputStyle = [styles.input, { color: colors.text, backgroundColor: colors.card }];
 
   const valid =
     nickname.trim().length >= 2 &&
@@ -199,7 +197,6 @@ const styles = StyleSheet.create({
   field: { gap: Spacing.sm },
   label: Typography.label,
   input: {
-    borderWidth: 1,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.lg,
     paddingVertical: 14,
