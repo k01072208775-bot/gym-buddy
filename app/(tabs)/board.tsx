@@ -10,9 +10,9 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChoiceChips } from '@/components/ui/choice-chips';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { BOARDS, TRADE_STATUS_LABELS, WORKOUT_SPORTS } from '@/constants/board';
 import { Radius, Spacing, Typography, type AppPalette } from '@/constants/theme';
 import { usePosts } from '@/features/board/hooks';
@@ -30,7 +30,6 @@ const SPORT_FILTERS = [ALL_SPORTS, ...WORKOUT_SPORTS].map((sport) => ({ value: s
 export default function BoardScreen() {
   const colors = useAppColors();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [board, setBoard] = useState<BoardType>('free');
   /** 운동게시판 종목 필터. null = 전체 */
   const [sport, setSport] = useState<string | null>(null);
@@ -49,8 +48,7 @@ export default function BoardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <Text style={[Typography.display, { color: colors.text }]}>게시판</Text>
+      <ScreenHeader title="게시판">
         <View style={styles.boardTabs}>
           {BOARDS.map((item) => {
             const active = item.value === board;
@@ -68,7 +66,7 @@ export default function BoardScreen() {
             );
           })}
         </View>
-      </View>
+      </ScreenHeader>
 
       {board === 'workout' ? (
         <View style={styles.sportBar}>
@@ -188,8 +186,7 @@ function PostRow({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.sm, gap: Spacing.sm },
-  boardTabs: { flexDirection: 'row', gap: 18 },
+  boardTabs: { flexDirection: 'row', gap: 18, marginTop: Spacing.xs },
   boardTab: { fontSize: 17, fontWeight: '500' },
   boardTabActive: { fontWeight: '800' },
   sportBar: { paddingTop: Spacing.xs, paddingBottom: Spacing.md },
