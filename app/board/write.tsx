@@ -13,8 +13,10 @@ import {
 } from 'react-native';
 
 import { ChoiceChips } from '@/components/ui/choice-chips';
+import { Field } from '@/components/ui/field';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { BOARDS, isBoardType, WORKOUT_SPORTS } from '@/constants/board';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { usePost, useSavePost } from '@/features/board/hooks';
 import { PostImagePicker } from '@/features/board/post-image-picker';
 import { useAppColors } from '@/hooks/use-app-colors';
@@ -114,10 +116,8 @@ function PostForm({
     );
   }
 
-  const inputStyle = [
-    styles.input,
-    { borderColor: colors.border, color: colors.text, backgroundColor: colors.card },
-  ];
+  // 로그인·채팅 입력칸과 같은 모양: 테두리 없이 한 단계 밝은 면
+  const inputStyle = [styles.input, { color: colors.text, backgroundColor: colors.card }];
 
   return (
     <KeyboardAvoidingView
@@ -129,53 +129,57 @@ function PostForm({
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         {/* 게시판 종류는 새 글일 때만 고를 수 있다 */}
         {editingId === null ? (
-          <ChoiceChips options={BOARDS} value={board} onChange={setBoard} />
+          <Field label="어디에 쓸까요?">
+            <ChoiceChips options={BOARDS} value={board} onChange={setBoard} />
+          </Field>
         ) : null}
 
         {isWorkout ? (
-          <View style={styles.field}>
-            <Text style={[styles.label, { color: colors.textMuted }]}>종목</Text>
+          <Field label="종목">
             <ChoiceChips options={SPORT_OPTIONS} value={sport} onChange={setSport} />
-          </View>
+          </Field>
         ) : null}
 
-        <TextInput
-          style={inputStyle}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="제목"
-          placeholderTextColor={colors.textMuted}
-          maxLength={60}
-        />
+        <Field label="제목">
+          <TextInput
+            style={inputStyle}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="한 줄로 요약해주세요"
+            placeholderTextColor={colors.textMuted}
+            maxLength={60}
+          />
+        </Field>
 
         {isMarket ? (
-          <View>
+          <Field label="가격" hint="0원으로 적으면 나눔으로 표시돼요.">
             <TextInput
               style={inputStyle}
               value={price}
               onChangeText={(text) => setPrice(text.replace(/[^0-9]/g, '').slice(0, 9))}
-              placeholder="가격 (원)"
+              placeholder="원 단위로 숫자만"
               placeholderTextColor={colors.textMuted}
               keyboardType="number-pad"
             />
-            <Text style={[styles.hint, { color: colors.textMuted }]}>0원으로 적으면 나눔으로 표시돼요.</Text>
-          </View>
+          </Field>
         ) : null}
 
-        <TextInput
-          style={[inputStyle, styles.bodyInput]}
-          value={body}
-          onChangeText={setBody}
-          placeholder={BOARDS.find((item) => item.value === board)?.placeholder}
-          placeholderTextColor={colors.textMuted}
-          maxLength={5000}
-          multiline
-          textAlignVertical="top"
-        />
+        <Field label="내용">
+          <TextInput
+            style={[inputStyle, styles.bodyInput]}
+            value={body}
+            onChangeText={setBody}
+            placeholder={BOARDS.find((item) => item.value === board)?.placeholder}
+            placeholderTextColor={colors.textMuted}
+            maxLength={5000}
+            multiline
+            textAlignVertical="top"
+          />
+        </Field>
 
         <PostImagePicker urls={imageUrls} onChange={setImageUrls} />
 
-        <Text style={[styles.hint, { color: colors.textMuted }]}>
+        <Text style={[Typography.caption, { color: colors.textMuted }]}>
           같은 학교 학생에게만 보여요. 욕설·비방·거래 사기 글은 신고되면 제재될 수 있어요.
         </Text>
 
@@ -193,10 +197,13 @@ function PostForm({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  form: { padding: 16, gap: 12 },
-  field: { gap: 8 },
-  label: { fontSize: 13, fontWeight: '600' },
-  input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
-  bodyInput: { minHeight: 220 },
-  hint: { fontSize: 12, marginTop: 4 },
+  form: { padding: Spacing.lg, gap: Spacing.xl, paddingBottom: 48 },
+  input: {
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: 14,
+    ...Typography.body,
+    fontSize: 16,
+  },
+  bodyInput: { minHeight: 200 },
 });

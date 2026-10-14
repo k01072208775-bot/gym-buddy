@@ -15,6 +15,7 @@ import {
 
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { BOARD_LABELS, TRADE_STATUSES, TRADE_STATUS_LABELS } from '@/constants/board';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import {
   useAddComment,
   useComments,
@@ -157,7 +158,7 @@ export default function PostDetailScreen() {
           title: BOARD_LABELS[post.board],
           headerRight: () => (
             <Pressable onPress={openPostMenu} hitSlop={12}>
-              <Text style={[styles.headerButton, { color: colors.primary }]}>
+              <Text style={[Typography.body, { color: colors.primary }]}>
                 {post.is_mine ? '관리' : '신고'}
               </Text>
             </Pressable>
@@ -172,10 +173,10 @@ export default function PostDetailScreen() {
         ListHeaderComponent={
           <View style={[styles.post, { borderBottomColor: colors.border }]}>
             {post.sport ? (
-              <Text style={[styles.sportTag, { color: colors.primary }]}>{post.sport}</Text>
+              <Text style={[Typography.label, { color: colors.primary }]}>{post.sport}</Text>
             ) : null}
             <Text style={[styles.title, { color: colors.text }]}>{post.title}</Text>
-            <Text style={[styles.meta, { color: colors.textMuted }]}>
+            <Text style={[Typography.caption, { color: colors.textMuted }]}>
               {post.author_nickname} · {formatRelativeTime(post.created_at)}
               {post.updated_at !== post.created_at ? ' · 수정됨' : ''}
             </Text>
@@ -200,12 +201,13 @@ export default function PostDetailScreen() {
                         }
                         style={[
                           styles.status,
-                          {
-                            borderColor: active ? colors.primary : colors.border,
-                            backgroundColor: active ? colors.primary : 'transparent',
-                          },
+                          { backgroundColor: active ? colors.primary : colors.chip },
                         ]}>
-                        <Text style={{ color: active ? colors.onPrimary : colors.textMuted }}>
+                        <Text
+                          style={[
+                            Typography.label,
+                            { color: active ? colors.onPrimary : colors.textMuted },
+                          ]}>
                           {TRADE_STATUS_LABELS[status]}
                         </Text>
                       </Pressable>
@@ -229,15 +231,19 @@ export default function PostDetailScreen() {
               <Pressable
                 style={[
                   styles.like,
-                  { borderColor: post.liked_by_me ? colors.primary : colors.border },
+                  { backgroundColor: post.liked_by_me ? colors.primary : colors.chip },
                 ]}
                 disabled={toggleLike.isPending}
                 onPress={() => toggleLike.mutate({ postId: post.id, liked: !post.liked_by_me })}>
-                <Text style={{ color: post.liked_by_me ? colors.primary : colors.textMuted }}>
+                <Text
+                  style={[
+                    Typography.label,
+                    { color: post.liked_by_me ? colors.onPrimary : colors.textMuted },
+                  ]}>
                   {post.liked_by_me ? '♥' : '♡'} 좋아요 {post.like_count}
                 </Text>
               </Pressable>
-              <Text style={[styles.commentCount, { color: colors.textMuted }]}>
+              <Text style={[Typography.caption, { color: colors.textMuted }]}>
                 댓글 {post.comment_count}
               </Text>
             </View>
@@ -257,18 +263,18 @@ export default function PostDetailScreen() {
             onLongPress={() => openCommentMenu(item)}
             style={[styles.comment, { borderBottomColor: colors.border }]}>
             <View style={styles.commentHeader}>
-              <Text style={[styles.commentAuthor, { color: colors.text }]}>
+              <Text style={[Typography.label, { color: colors.text }]}>
                 {item.author_nickname}
                 {item.author_id === post.author_id ? ' (글쓴이)' : ''}
               </Text>
               <Pressable onPress={() => openCommentMenu(item)} hitSlop={10}>
-                <Text style={[styles.commentMenu, { color: colors.textMuted }]}>
+                <Text style={[Typography.caption, { color: colors.textMuted }]}>
                   {item.is_mine ? '삭제' : '신고'}
                 </Text>
               </Pressable>
             </View>
-            <Text style={{ color: colors.text }}>{item.body}</Text>
-            <Text style={[styles.commentTime, { color: colors.textMuted }]}>
+            <Text style={[Typography.body, { color: colors.text }]}>{item.body}</Text>
+            <Text style={[Typography.caption, { color: colors.textMuted }]}>
               {formatRelativeTime(item.created_at)}
             </Text>
           </Pressable>
@@ -277,10 +283,7 @@ export default function PostDetailScreen() {
 
       <View style={[styles.composer, { borderTopColor: colors.border }]}>
         <TextInput
-          style={[
-            styles.input,
-            { borderColor: colors.border, color: colors.text, backgroundColor: colors.card },
-          ]}
+          style={[styles.input, { color: colors.text, backgroundColor: colors.card }]}
           value={draft}
           onChangeText={setDraft}
           placeholder="댓글 입력"
@@ -312,43 +315,47 @@ export default function PostDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  headerButton: { fontSize: 15, fontWeight: '600' },
   list: { flexGrow: 1 },
-  post: { padding: 16, gap: 8, borderBottomWidth: StyleSheet.hairlineWidth },
-  sportTag: { fontSize: 13, fontWeight: '700' },
-  title: { fontSize: 20, fontWeight: '700' },
-  meta: { fontSize: 13 },
-  market: { gap: 8, marginTop: 4 },
-  price: { fontSize: 20, fontWeight: '700' },
-  statusRow: { flexDirection: 'row', gap: 6 },
-  status: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
-  images: { gap: 8, marginTop: 8 },
-  body: { fontSize: 15, lineHeight: 23, marginTop: 8 },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
-  like: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
-  commentCount: { fontSize: 14 },
-  empty: { textAlign: 'center', marginTop: 32 },
-  comment: { paddingHorizontal: 16, paddingVertical: 12, gap: 4, borderBottomWidth: StyleSheet.hairlineWidth },
+  post: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    gap: Spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  title: Typography.title,
+  market: { gap: Spacing.sm, marginTop: Spacing.xs },
+  price: { ...Typography.title, fontSize: 24 },
+  statusRow: { flexDirection: 'row', gap: Spacing.xs },
+  status: { borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 6 },
+  images: { gap: Spacing.sm, marginTop: Spacing.sm },
+  body: { ...Typography.body, marginTop: Spacing.sm },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.md },
+  like: { borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
+  empty: { ...Typography.body, textAlign: 'center', marginTop: 32 },
+  comment: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    gap: Spacing.xs,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
   commentHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  commentAuthor: { fontSize: 14, fontWeight: '600' },
-  commentMenu: { fontSize: 12 },
-  commentTime: { fontSize: 12 },
   composer: {
     flexDirection: 'row',
-    gap: 8,
-    padding: 12,
-    borderTopWidth: 1,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
     alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 16,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: 10,
     maxHeight: 120,
+    ...Typography.body,
   },
-  send: { borderRadius: 20, paddingHorizontal: 18, paddingVertical: 12 },
+  send: { borderRadius: Radius.lg, paddingHorizontal: Spacing.lg, paddingVertical: 11 },
   sendDisabled: { opacity: 0.4 },
-  sendText: { fontWeight: '600' },
+  sendText: { fontSize: 15, fontWeight: '800' },
 });

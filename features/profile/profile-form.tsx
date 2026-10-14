@@ -1,7 +1,8 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ChipGroup } from '@/components/ui/chip-group';
+import { Field } from '@/components/ui/field';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { EXPERIENCE_LABELS, GENDER_LABELS, SPORTS, TIME_SLOTS } from '@/constants/workout';
@@ -182,20 +183,8 @@ export function ProfileForm({
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  const colors = useAppColors();
-  return (
-    <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.textMuted }]}>{label}</Text>
-      {children}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   form: { gap: Spacing.xl },
-  field: { gap: Spacing.sm },
-  label: Typography.label,
   input: {
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.lg,

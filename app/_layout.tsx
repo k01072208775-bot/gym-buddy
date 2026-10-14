@@ -31,7 +31,13 @@ export default function RootLayout() {
       <SessionProvider>
         <ThemeProvider value={navigationTheme}>
           <AuthGate>
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                // 탭 화면과 같은 느낌: 그림자 없는 헤더 + 굵은 제목
+                headerShadowVisible: false,
+                headerTitleStyle: { fontWeight: '800' },
+              }}>
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen
