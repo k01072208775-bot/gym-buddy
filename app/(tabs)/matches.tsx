@@ -14,7 +14,7 @@ import {
 import { Avatar } from '@/components/ui/avatar';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
-import { Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useLikesReceived, useMatches, useRefreshMatching } from '@/features/matching/hooks';
 import { LikesReceivedSection } from '@/features/matching/likes-received-section';
 import { useMyProfile } from '@/features/profile/hooks';
@@ -96,7 +96,7 @@ export default function MatchesScreen() {
           renderItem={({ item }) => (
             <Pressable
               onPress={() => router.push(`/chat/${item.matchId}`)}
-              style={[styles.row, { borderTopColor: colors.border }]}>
+              style={[styles.row, { backgroundColor: colors.card }]}>
               <Avatar url={item.partner.avatar_url} name={item.partner.nickname} size={52} />
               <View style={styles.rowText}>
                 <Text style={[Typography.heading, { color: colors.text }]} numberOfLines={1}>
@@ -125,15 +125,14 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   emptyText: { ...Typography.body, textAlign: 'center' },
-  list: { paddingBottom: Spacing.xl, flexGrow: 1 },
-  listTitle: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.sm },
+  list: { padding: Spacing.lg, paddingBottom: Spacing.xl, gap: Spacing.sm, flexGrow: 1 },
+  listTitle: { paddingBottom: Spacing.sm },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
   },
   rowText: { flex: 1, gap: 2 },
 });

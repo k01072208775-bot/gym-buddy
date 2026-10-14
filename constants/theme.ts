@@ -53,44 +53,54 @@ export const Fonts = Platform.select({
 });
 
 /**
- * 앱 화면에서 쓰는 색상 — "스포츠형(C)" 디자인.
+ * 앱 화면에서 쓰는 색상.
  *
- * 어두운 배경 + 형광 연두 포인트. 지금은 라이트/다크 모드와 상관없이 항상 이 색을 씁니다.
- * 나중에 밝은 테마를 만들려면 light 에 다른 색표를 넣으면 됩니다.
+ * 연한 회색 배경 위에 흰 카드를 얹는 밝은 테마입니다.
+ * 포인트는 초록(primary), 강조·주의는 빨강(danger),
+ * 고르는 칩처럼 "지금 선택됨"을 나타낼 때는 검정(selected)을 씁니다.
  *
- * 화면 코드에 #97C459 같은 값을 직접 적지 말고 반드시 여기를 거치세요.
+ * 지금은 라이트/다크 모드와 상관없이 항상 이 색을 씁니다.
+ * 화면 코드에 #00C471 같은 값을 직접 적지 말고 반드시 여기를 거치세요.
  */
-const sportPalette = {
-  background: '#2C2C2A',
-  /** 입력칸, 카드처럼 배경 위에 한 단계 떠 있는 면 */
-  card: '#383836',
-  /** 선택 안 된 칩, 버튼 같은 채워진 컨트롤 */
-  chip: '#444441',
-  text: '#F1EFE8',
-  textMuted: '#A3A198',
-  border: '#444441',
-  /** 포인트 색 (형광 연두) — 위에 올리는 글자는 onPrimary */
-  primary: '#97C459',
-  onPrimary: '#173404',
-  danger: '#F09595',
-  bubbleMine: '#97C459',
-  bubbleMineText: '#173404',
-  bubbleTheirs: '#444441',
-  bubbleTheirsText: '#F1EFE8',
+const palette = {
+  /** 페이지 배경 (카드가 떠 보이도록 살짝 회색) */
+  background: '#F4F5F7',
+  /** 카드, 입력칸처럼 배경 위에 얹는 흰 면 */
+  card: '#FFFFFF',
+  /** 선택 안 된 칩 */
+  chip: '#EFF1F4',
+  text: '#17181A',
+  textMuted: '#8B8F96',
+  border: '#E6E8EC',
+  /** 포인트 색 — 위에 올리는 글자는 onPrimary */
+  primary: '#00B96B',
+  onPrimary: '#FFFFFF',
+  /** 연한 초록 배지 (겹치는 종목처럼 가볍게 강조할 때) */
+  primarySoft: '#E3F6EC',
+  onPrimarySoft: '#007A47',
+  /** 고른 칩·탭처럼 "선택됨"을 또렷하게 보여줄 때 */
+  selected: '#17181A',
+  onSelected: '#FFFFFF',
+  /** 신고·삭제처럼 되돌릴 수 없는 것, 그리고 '신규' 배지 */
+  danger: '#F04452',
+  bubbleMine: '#00B96B',
+  bubbleMineText: '#FFFFFF',
+  bubbleTheirs: '#FFFFFF',
+  bubbleTheirsText: '#17181A',
 };
 
 export const AppColors = {
-  light: sportPalette,
-  dark: sportPalette,
+  light: palette,
+  dark: palette,
 };
 
-export type AppPalette = typeof sportPalette;
+export type AppPalette = typeof palette;
 
-/** 모서리 둥글기. 스포츠형은 알약 모양보다 살짝 각진 모서리를 씁니다. */
+/** 모서리 둥글기. 전체적으로 넉넉하게 둥글립니다. */
 export const Radius = {
-  sm: 6,
-  md: 10,
-  lg: 14,
+  sm: 8,
+  md: 12,
+  lg: 16,
   pill: 999,
 } as const;
 

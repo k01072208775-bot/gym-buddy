@@ -11,11 +11,15 @@ export function Tag({ label, active = false }: { label: string; active?: boolean
   const colors = useAppColors();
 
   return (
-    <View style={[styles.tag, { backgroundColor: active ? colors.primary : colors.chip }]}>
+    <View
+      style={[
+        styles.tag,
+        { backgroundColor: active ? colors.primarySoft : colors.chip },
+      ]}>
       <Text
         style={[
           styles.label,
-          { color: active ? colors.onPrimary : colors.text },
+          { color: active ? colors.onPrimarySoft : colors.textMuted },
           active && styles.labelActive,
         ]}>
         {label}
@@ -37,7 +41,7 @@ export function TagRow({ labels, highlight = [] }: { labels: string[]; highlight
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs },
-  tag: { borderRadius: Radius.sm, paddingHorizontal: Spacing.sm, paddingVertical: 3 },
+  tag: { borderRadius: Radius.pill, paddingHorizontal: Spacing.md, paddingVertical: 4 },
   label: { fontSize: 13 },
   labelActive: { fontWeight: '700' },
 });

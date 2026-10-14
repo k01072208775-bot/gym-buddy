@@ -28,11 +28,16 @@ export function ChoiceChips<T extends string>({
       <Pressable
         key={option.value}
         onPress={() => onChange(option.value)}
-        style={[styles.chip, { backgroundColor: active ? colors.primary : colors.chip }]}>
+        style={[
+          styles.chip,
+          active
+            ? { backgroundColor: colors.selected, borderColor: colors.selected }
+            : { backgroundColor: colors.card, borderColor: colors.border },
+        ]}>
         <Text
           style={[
             styles.label,
-            { color: active ? colors.onPrimary : colors.text },
+            { color: active ? colors.onSelected : colors.textMuted },
             active && styles.labelActive,
           ]}>
           {option.label}
@@ -58,7 +63,12 @@ export function ChoiceChips<T extends string>({
 const styles = StyleSheet.create({
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
   scrollRow: { flexDirection: 'row', gap: Spacing.sm, paddingHorizontal: Spacing.lg },
-  chip: { borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 7 },
+  chip: {
+    borderRadius: Radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: Spacing.md + 2,
+    paddingVertical: 7,
+  },
   label: { fontSize: 14 },
   labelActive: { fontWeight: '700' },
 });

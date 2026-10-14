@@ -23,7 +23,11 @@ export function ScreenHeader({
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
+    <View
+      style={[
+        styles.header,
+        { paddingTop: insets.top + Spacing.md, backgroundColor: colors.card },
+      ]}>
       <Text style={[Typography.display, { color: colors.text }]}>{title}</Text>
       {subtitle ? (
         <Text style={[Typography.caption, { color: colors.textMuted }]}>{subtitle}</Text>

@@ -1,4 +1,4 @@
-import { DarkTheme, ThemeProvider } from 'expo-router/react-navigation';
+import { DefaultTheme, ThemeProvider } from 'expo-router/react-navigation';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -15,11 +15,12 @@ export default function RootLayout() {
 
   // 채팅·게시글 화면의 상단 헤더도 앱 색상표를 따르도록 내비게이션 테마를 맞춘다
   const navigationTheme = {
-    ...DarkTheme,
+    ...DefaultTheme,
     colors: {
-      ...DarkTheme.colors,
+      ...DefaultTheme.colors,
       background: colors.background,
-      card: colors.background,
+      // 상단 헤더는 흰 면
+      card: colors.card,
       text: colors.text,
       border: colors.border,
       primary: colors.primary,
@@ -58,7 +59,7 @@ export default function RootLayout() {
               />
             </Stack>
           </AuthGate>
-          <StatusBar style="light" />
+          <StatusBar style="dark" />
         </ThemeProvider>
       </SessionProvider>
     </QueryClientProvider>

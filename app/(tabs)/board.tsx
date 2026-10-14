@@ -53,11 +53,18 @@ export default function BoardScreen() {
           {BOARDS.map((item) => {
             const active = item.value === board;
             return (
-              <Pressable key={item.value} onPress={() => setBoard(item.value)} hitSlop={8}>
+              <Pressable
+                key={item.value}
+                onPress={() => setBoard(item.value)}
+                hitSlop={8}
+                style={[
+                  styles.boardTab,
+                  { borderBottomColor: active ? colors.selected : 'transparent' },
+                ]}>
                 <Text
                   style={[
-                    styles.boardTab,
-                    { color: active ? colors.primary : colors.textMuted },
+                    styles.boardTabText,
+                    { color: active ? colors.selected : colors.textMuted },
                     active && styles.boardTabActive,
                   ]}>
                   {item.label}
@@ -69,7 +76,7 @@ export default function BoardScreen() {
       </ScreenHeader>
 
       {board === 'workout' ? (
-        <View style={styles.sportBar}>
+        <View style={[styles.sportBar, { backgroundColor: colors.card }]}>
           <ChoiceChips
             scroll
             options={SPORT_FILTERS}
@@ -150,7 +157,11 @@ function PostRow({
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.row, { borderTopColor: colors.border }, sold && styles.sold]}>
+      style={[styles.row, { backgroundColor: colors.card }, sold && styles.sold]}>
+      {post.image_urls.length > 0 ? (
+        <Image source={{ uri: post.image_urls[0] }} style={styles.thumb} contentFit="cover" />
+      ) : null}
+
       <View style={styles.rowText}>
         {label ? (
           <Text style={[Typography.label, { color: sold ? colors.textMuted : colors.primary }]}>
@@ -176,43 +187,39 @@ function PostRow({
           {post.comment_count > 0 ? ` · 댓글 ${post.comment_count}` : ''}
         </Text>
       </View>
-
-      {post.image_urls.length > 0 ? (
-        <Image source={{ uri: post.image_urls[0] }} style={styles.thumb} contentFit="cover" />
-      ) : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  boardTabs: { flexDirection: 'row', gap: 18, marginTop: Spacing.xs },
-  boardTab: { fontSize: 17, fontWeight: '500' },
+  boardTabs: { flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.sm },
+  boardTab: { paddingBottom: Spacing.sm, borderBottomWidth: 2 },
+  boardTabText: { fontSize: 17, fontWeight: '500' },
   boardTabActive: { fontWeight: '800' },
   sportBar: { paddingTop: Spacing.xs, paddingBottom: Spacing.md },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   emptyText: { textAlign: 'center', lineHeight: 22 },
-  list: { paddingBottom: 96, flexGrow: 1 },
+  list: { padding: Spacing.lg, paddingBottom: 110, gap: Spacing.sm, flexGrow: 1 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: 14,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
   },
   rowText: { flex: 1, gap: 3 },
-  thumb: { width: 64, height: 64, borderRadius: Radius.md },
+  thumb: { width: 72, height: 72, borderRadius: Radius.md },
   sold: { opacity: 0.5 },
   preview: { fontSize: 14 },
   price: { fontSize: 15, fontWeight: '800' },
   fab: {
     position: 'absolute',
-    right: Spacing.lg,
-    bottom: Spacing.lg,
-    borderRadius: Radius.md,
-    paddingHorizontal: 18,
-    paddingVertical: 13,
+    alignSelf: 'center',
+    bottom: Spacing.xl,
+    borderRadius: Radius.pill,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: 14,
   },
   fabText: { fontSize: 15, fontWeight: '800' },
 });
