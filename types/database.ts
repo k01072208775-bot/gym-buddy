@@ -171,6 +171,21 @@ export type Candidate = {
   shared_slots: number;
 };
 
+/** get_matches RPC 가 돌려주는 매칭 한 줄 */
+export type MatchRow = {
+  match_id: number;
+  matched_at: string;
+  partner_id: string;
+  partner_nickname: string;
+  partner_university: string;
+  partner_avatar_url: string | null;
+  /** 아직 대화가 없으면 null */
+  last_message: string | null;
+  last_message_at: string | null;
+  last_message_is_mine: boolean | null;
+  unread_count: number;
+};
+
 /** get_likes_received RPC 가 돌려주는, 나에게 '같이 운동해요'를 보낸 사람 */
 export type LikeReceived = Candidate & {
   liked_at: string;
@@ -215,6 +230,14 @@ export type Database = {
       get_likes_received: {
         Args: { limit_count?: number };
         Returns: LikeReceived[];
+      };
+      get_matches: {
+        Args: Record<string, never>;
+        Returns: MatchRow[];
+      };
+      mark_match_read: {
+        Args: { p_match_id: number };
+        Returns: void;
       };
       get_posts: {
         Args: {

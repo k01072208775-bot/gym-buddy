@@ -99,14 +99,39 @@ export default function MatchesScreen() {
               style={[styles.row, { backgroundColor: colors.card }]}>
               <Avatar url={item.partner.avatar_url} name={item.partner.nickname} size={52} />
               <View style={styles.rowText}>
-                <Text style={[Typography.heading, { color: colors.text }]} numberOfLines={1}>
-                  {item.partner.nickname}
-                </Text>
-                <Text style={[Typography.caption, { color: colors.textMuted }]}>
-                  {formatRelativeTime(item.matchedAt)} 매칭
-                </Text>
+                <View style={styles.rowTop}>
+                  <Text style={[Typography.heading, { color: colors.text }]} numberOfLines={1}>
+                    {item.partner.nickname}
+                  </Text>
+                  <Text style={[Typography.caption, { color: colors.textMuted }]}>
+                    {formatRelativeTime(item.lastMessage?.at ?? item.matchedAt)}
+                  </Text>
+                </View>
+
+                {item.lastMessage ? (
+                  <Text
+                    style={[
+                      Typography.caption,
+                      { color: item.unreadCount > 0 ? colors.text : colors.textMuted },
+                    ]}
+                    numberOfLines={1}>
+                    {item.lastMessage.isMine ? '나: ' : ''}
+                    {item.lastMessage.body}
+                  </Text>
+                ) : (
+                  <Text style={[Typography.caption, { color: colors.textMuted }]} numberOfLines={1}>
+                    매칭됐어요! 먼저 인사를 건네보세요.
+                  </Text>
+                )}
               </View>
-              <Text style={[Typography.label, { color: colors.primary }]}>채팅 ›</Text>
+
+              {item.unreadCount > 0 ? (
+                <View style={[styles.unread, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.unreadText, { color: colors.onPrimary }]}>
+                    {item.unreadCount}
+                  </Text>
+                </View>
+              ) : null}
             </Pressable>
           )}
         />
@@ -135,4 +160,14 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
   },
   rowText: { flex: 1, gap: 2 },
+  rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.sm },
+  unread: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unreadText: { fontSize: 12, fontWeight: '800' },
 });

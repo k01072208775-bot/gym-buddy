@@ -6,6 +6,10 @@ export type MatchWithPartner = {
   matchId: number;
   matchedAt: string;
   partner: Pick<Profile, 'id' | 'nickname' | 'university' | 'avatar_url'>;
+  /** 아직 대화가 없으면 null */
+  lastMessage: { body: string; at: string; isMine: boolean } | null;
+  /** 내가 아직 안 읽은 상대 메시지 수 */
+  unreadCount: number;
 };
 
 /**
@@ -59,33 +63,35 @@ export async function fetchLikesReceived(): Promise<LikeReceived[]> {
   return data ?? [];
 }
 
-/** 성사된 매칭 목록 + 상대방 프로필 */
+/**
+ * 성사된 매칭 목록 + 상대방 프로필 + 마지막 메시지 + 안 읽은 개수.
+ * 전에는 matches 와 profiles 를 따로 불러 앱에서 합쳤는데, 대화 정보까지
+ * 넣으면 대화방 수만큼 요청이 늘어나므로 DB 함수 하나로 받습니다
+ * (0009_message_reads.sql). 최근 대화가 있는 방이 위로 옵니다.
+ */
 export async function fetchMatches(): Promise<MatchWithPartner[]> {
-  const me = await getCurrentUserId();
-
-  const { data: matches, error } = await supabase
-    .from('matches')
-    .select('id, user_a, user_b, created_at')
-    .order('created_at', { ascending: false });
+  const { data, error } = await supabase.rpc('get_matches', {});
   if (error) throw error;
-  if (!matches?.length) return [];
 
-  const partnerIds = matches.map((m) => (m.user_a === me ? m.user_b : m.user_a));
-
-  const { data: profiles, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, nickname, university, avatar_url')
-    .in('id', partnerIds);
-  if (profileError) throw profileError;
-
-  const byId = new Map(profiles.map((p) => [p.id, p]));
-
-  return matches.flatMap((m) => {
-    const partner = byId.get(m.user_a === me ? m.user_b : m.user_a);
-    // 상대가 탈퇴했거나 차단되어 RLS에 걸린 경우 목록에서 제외
-    if (!partner) return [];
-    return [{ matchId: m.id, matchedAt: m.created_at, partner }];
-  });
+  return (data ?? []).map((row) => ({
+    matchId: row.match_id,
+    matchedAt: row.matched_at,
+    partner: {
+      id: row.partner_id,
+      nickname: row.partner_nickname,
+      university: row.partner_university,
+      avatar_url: row.partner_avatar_url,
+    },
+    lastMessage:
+      row.last_message === null
+        ? null
+        : {
+            body: row.last_message,
+            at: row.last_message_at!,
+            isMine: row.last_message_is_mine!,
+          },
+    unreadCount: row.unread_count,
+  }));
 }
 
 /** 매칭 해제 */

@@ -16,7 +16,7 @@ import {
 import { Avatar } from '@/components/ui/avatar';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { Radius, Spacing, Typography } from '@/constants/theme';
-import { fetchMessages, sendMessage, subscribeToMessages } from '@/features/chat/api';
+import { fetchMessages, markMatchRead, sendMessage, subscribeToMessages } from '@/features/chat/api';
 import { useMatches, useRefreshMatching } from '@/features/matching/hooks';
 import { reportAndBlock } from '@/features/safety/api';
 import { useAppColors } from '@/hooks/use-app-colors';
@@ -42,6 +42,17 @@ export default function ChatScreen() {
   const [sending, setSending] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const listRef = useRef<FlatList<Message>>(null);
+
+  // 대화방을 열거나 새 메시지를 받으면 읽음으로 표시합니다.
+  // 실패해도 대화 자체에는 지장이 없으므로 조용히 넘어갑니다.
+  const messageCount = messages?.length ?? 0;
+  useEffect(() => {
+    if (!Number.isFinite(matchId)) return;
+    markMatchRead(matchId).catch(() => {});
+  }, [matchId, messageCount]);
+
+  // 화면을 떠날 때 매칭 목록의 안 읽음 배지를 새로 계산하게 합니다
+  useEffect(() => () => void refreshMatching(), [refreshMatching]);
 
   useEffect(() => {
     if (!Number.isFinite(matchId)) return;

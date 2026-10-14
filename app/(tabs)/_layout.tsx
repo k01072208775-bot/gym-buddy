@@ -1,13 +1,16 @@
 import { Tabs } from 'expo-router';
 
-import { useLikesReceived } from '@/features/matching/hooks';
+import { useLikesReceived, useMatches } from '@/features/matching/hooks';
 import { useAppColors } from '@/hooks/use-app-colors';
 
 export default function TabsLayout() {
   const colors = useAppColors();
-  // 푸시 알림 대신: 나에게 관심을 보낸 사람 수를 매칭 탭에 연두색 숫자로 띄운다
+  // 푸시 알림 대신: 챙겨야 할 것(받은 관심 + 안 읽은 메시지) 수를 매칭 탭에 띄운다
   const { data: likes } = useLikesReceived();
-  const likeCount = likes?.length ?? 0;
+  const { data: matches } = useMatches();
+  const waitingCount =
+    (likes?.length ?? 0) +
+    (matches ?? []).reduce((sum, match) => sum + match.unreadCount, 0);
 
   return (
     <Tabs
@@ -27,7 +30,7 @@ export default function TabsLayout() {
         name="matches"
         options={{
           title: '매칭',
-          tabBarBadge: likeCount > 0 ? likeCount : undefined,
+          tabBarBadge: waitingCount > 0 ? waitingCount : undefined,
           tabBarBadgeStyle: { backgroundColor: colors.primary, color: colors.onPrimary, fontWeight: '800' },
         }}
       />

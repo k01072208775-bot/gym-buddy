@@ -2,6 +2,12 @@ import { getCurrentUserId } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import type { Message } from '@/types/database';
 
+/** 대화방을 열었을 때 읽음으로 표시 (0009_message_reads.sql) */
+export async function markMatchRead(matchId: number): Promise<void> {
+  const { error } = await supabase.rpc('mark_match_read', { p_match_id: matchId });
+  if (error) throw error;
+}
+
 export async function fetchMessages(matchId: number): Promise<Message[]> {
   const { data, error } = await supabase
     .from('messages')

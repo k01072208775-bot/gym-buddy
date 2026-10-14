@@ -33,7 +33,7 @@ begin
     select 1 from pg_constraint where conname = 'posts_capacity_only_workout'
   ) then
     alter table public.posts
-      add constraint posts_capacity_only_workout check (board = 'workout' or capacity is null);
+      add co nstraint posts_capacity_only_workout check (board = 'workout' or capacity is null);
   end if;
 end
 $$;
