@@ -151,8 +151,10 @@ function PostRow({
   const sold = post.trade_status === 'sold';
   const isMarket = post.board === 'market' && post.price !== null;
 
-  // 제목 위 작은 연두색 라벨: 운동은 종목, 장터는 거래 상태
-  const label = post.sport ?? (isMarket && post.trade_status ? TRADE_STATUS_LABELS[post.trade_status] : null);
+  // 제목 위 작은 초록색 라벨: 운동은 종목, 장터는 거래 상태. 모집글이면 인원도 함께
+  const base = post.sport ?? (isMarket && post.trade_status ? TRADE_STATUS_LABELS[post.trade_status] : null);
+  const recruit = post.capacity !== null ? post.participant_count + '/' + post.capacity + '명' : null;
+  const label = [base, recruit].filter(Boolean).join(' · ') || null;
 
   return (
     <Pressable

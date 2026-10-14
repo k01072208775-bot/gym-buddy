@@ -99,6 +99,10 @@ export type Post = {
   /** 장터게시판만. 0 = 나눔 */
   price: number | null;
   trade_status: TradeStatus | null;
+  /** 운동게시판 모집글만. null 이면 모집이 아닌 그냥 글 (0007_post_join.sql) */
+  capacity: number | null;
+  /** 글쓴이는 주최자라 인원에 포함하지 않습니다 */
+  participant_count: number;
   like_count: number;
   comment_count: number;
   created_at: string;
@@ -123,7 +127,23 @@ export type PostLike = {
 export type PostItem = Omit<Post, 'university'> & {
   author_nickname: string;
   liked_by_me: boolean;
+  joined_by_me: boolean;
   is_mine: boolean;
+};
+
+/** post_participants 테이블 한 줄 */
+export type PostParticipation = {
+  post_id: number;
+  user_id: string;
+  created_at: string;
+};
+
+/** get_post_participants RPC 가 돌려주는 참여자 */
+export type PostParticipant = {
+  user_id: string;
+  nickname: string;
+  avatar_url: string | null;
+  joined_at: string;
 };
 
 /** get_comments RPC 가 돌려주는 댓글 */
@@ -182,6 +202,7 @@ export type Database = {
       >;
       post_comments: Table<PostComment, 'post_id' | 'author_id' | 'body', 'id' | 'created_at'>;
       post_likes: Table<PostLike, 'post_id' | 'user_id', 'created_at'>;
+      post_participants: Table<PostParticipation, 'post_id' | 'user_id', 'created_at'>;
     };
     Views: Record<never, never>;
     Functions: {
@@ -205,6 +226,10 @@ export type Database = {
       get_post: {
         Args: { p_post_id: number };
         Returns: PostItem[];
+      };
+      get_post_participants: {
+        Args: { p_post_id: number };
+        Returns: PostParticipant[];
       };
       get_comments: {
         Args: { p_post_id: number };

@@ -24,6 +24,12 @@ import type { BoardType, PostItem } from '@/types/database';
 
 const SPORT_OPTIONS = WORKOUT_SPORTS.map((sport) => ({ value: sport, label: sport }));
 
+/** 모집 인원 선택지. '0' 은 모집하지 않는 그냥 글 */
+const CAPACITY_OPTIONS = [
+  { value: '0', label: '모집 안 함' },
+  ...[1, 2, 3, 4, 5, 6, 8, 10].map((n) => ({ value: String(n), label: n + '명' })),
+];
+
 /**
  * 글쓰기 / 글 수정 공용 화면.
  *   새 글:   /board/write?board=workout&sport=풋살
@@ -82,6 +88,8 @@ function PostForm({
   const [title, setTitle] = useState(initial?.title ?? '');
   const [body, setBody] = useState(initial?.body ?? '');
   const [price, setPrice] = useState(initial?.price != null ? String(initial.price) : '');
+  /** null = 모집이 아닌 그냥 글 */
+  const [capacity, setCapacity] = useState<number | null>(initial?.capacity ?? null);
   const [imageUrls, setImageUrls] = useState<string[]>(initial?.image_urls ?? []);
 
   const isMarket = board === 'market';
@@ -103,6 +111,7 @@ function PostForm({
           body,
           price: isMarket ? Number(price) : null,
           sport: isWorkout ? sport : null,
+          capacity: isWorkout ? capacity : null,
           imageUrls,
         },
       },
@@ -137,6 +146,19 @@ function PostForm({
         {isWorkout ? (
           <Field label="종목">
             <ChoiceChips options={SPORT_OPTIONS} value={sport} onChange={setSport} />
+          </Field>
+        ) : null}
+
+        {isWorkout ? (
+          <Field
+            label="몇 명 구하나요?"
+            hint="인원을 정하면 다른 학생이 글에서 바로 참여할 수 있어요. 글쓴이는 인원에 포함되지 않아요.">
+            <ChoiceChips
+              scroll
+              options={CAPACITY_OPTIONS}
+              value={String(capacity ?? 0)}
+              onChange={(next) => setCapacity(next === '0' ? null : Number(next))}
+            />
           </Field>
         ) : null}
 

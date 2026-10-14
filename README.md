@@ -11,7 +11,7 @@
 
 1. https://supabase.com 에서 프로젝트 생성 (Region: **Northeast Asia (Seoul)**)
 2. **SQL Editor** 에 `supabase/migrations/0001_init.sql` 붙여넣고 Run
-3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql`, `0006_likes_received.sql` 도 순서대로 Run
+3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql`, `0006_likes_received.sql`, `0007_post_join.sql` 도 순서대로 Run
 4. **Project Settings → API** 에서 Project URL 과 `anon` public key 복사
 
 ### 2) 환경변수
@@ -89,6 +89,7 @@ supabase/migrations/     ← DB 설계도 (SQL)
   탐색에서 원래 계정에 '같이 운동해요' → 원래 계정으로 로그인 → 매칭 탭 배지 · 수락 확인
 
 **그다음 후보**
+0. 모집 기능 확인 — 운동게시판 글쓰기에서 인원을 정하고, 다른 계정으로 참여해보기 (`0007` 실행 필요)
 1. ~~글쓰기 · 글 상세 · 프로필 수정 화면 새 디자인~~ → 완료 (모든 화면 적용 끝)
 2. 학교 이메일 실제 인증 + 비밀번호 찾기 (SMTP 연결) + 이용약관 동의 — 가입 화면을 함께 건드리므로 묶어서
 3. 푸시 알림 — 지금은 앱 안 배지만 있음. 안드로이드 Expo Go 에서는 원격 푸시를 받을 수 없어 개발용 빌드가 필요

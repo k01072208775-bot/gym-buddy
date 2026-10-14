@@ -19,6 +19,8 @@ import { Radius, Spacing, Typography } from '@/constants/theme';
 import {
   useAddComment,
   useComments,
+  useParticipants,
+  useToggleJoin,
   useDeleteComment,
   useDeletePost,
   usePost,
@@ -43,6 +45,8 @@ export default function PostDetailScreen() {
   const { data: post, isPending } = usePost(postId);
   const { data: comments } = useComments(postId);
   const toggleLike = useToggleLike();
+  const toggleJoin = useToggleJoin();
+  const { data: participants } = useParticipants(postId);
   const deletePost = useDeletePost();
   const setTradeStatus = useSetTradeStatus();
   const addComment = useAddComment(postId);
@@ -217,6 +221,68 @@ export default function PostDetailScreen() {
               </View>
             ) : null}
 
+            {post.capacity !== null ? (
+              <View style={[styles.recruit, { backgroundColor: colors.background }]}>
+                <View style={styles.recruitHead}>
+                  <Text style={[Typography.heading, { color: colors.text }]}>
+                    모집 {post.participant_count}/{post.capacity}명
+                  </Text>
+                  {post.participant_count >= post.capacity ? (
+                    <Text style={[Typography.label, { color: colors.textMuted }]}>마감</Text>
+                  ) : (
+                    <Text style={[Typography.label, { color: colors.primary }]}>
+                      {post.capacity - post.participant_count}자리 남음
+                    </Text>
+                  )}
+                </View>
+
+                <Text style={[Typography.caption, { color: colors.textMuted }]}>
+                  {participants && participants.length > 0
+                    ? participants.map((person) => person.nickname).join(' · ') + ' 참여 중'
+                    : '아직 참여한 사람이 없어요'}
+                </Text>
+
+                {/* 글쓴이는 주최자라 자기 글에 참여하지 않는다 */}
+                {post.is_mine ? null : (
+                  <Pressable
+                    style={[
+                      styles.joinButton,
+                      {
+                        backgroundColor: post.joined_by_me ? colors.chip : colors.primary,
+                      },
+                      !post.joined_by_me &&
+                        post.participant_count >= post.capacity &&
+                        styles.joinDisabled,
+                    ]}
+                    disabled={
+                      toggleJoin.isPending ||
+                      (!post.joined_by_me && post.participant_count >= post.capacity)
+                    }
+                    onPress={() =>
+                      toggleJoin.mutate(
+                        { postId: post.id, joined: !post.joined_by_me },
+                        {
+                          onError: (err) =>
+                            Alert.alert('처리 실패', (err as Error).message),
+                        }
+                      )
+                    }>
+                    <Text
+                      style={[
+                        styles.joinText,
+                        { color: post.joined_by_me ? colors.text : colors.onPrimary },
+                      ]}>
+                      {post.joined_by_me
+                        ? '참여 취소'
+                        : post.participant_count >= post.capacity
+                          ? '자리가 찼어요'
+                          : '참여하기'}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            ) : null}
+
             {post.image_urls.length > 0 ? (
               <View style={styles.images}>
                 {post.image_urls.map((url) => (
@@ -327,6 +393,21 @@ const styles = StyleSheet.create({
   price: { ...Typography.title, fontSize: 24 },
   statusRow: { flexDirection: 'row', gap: Spacing.xs },
   status: { borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 6 },
+  recruit: {
+    gap: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    marginTop: Spacing.sm,
+  },
+  recruitHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  joinButton: {
+    borderRadius: Radius.md,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: Spacing.xs,
+  },
+  joinDisabled: { opacity: 0.4 },
+  joinText: { fontSize: 15, fontWeight: '800' },
   images: { gap: Spacing.sm, marginTop: Spacing.sm },
   body: { ...Typography.body, marginTop: Spacing.sm },
   actions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.md },

@@ -1,7 +1,13 @@
 import { uploadImage } from '@/lib/image-upload';
 import { getCurrentUserId } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
-import type { BoardType, CommentItem, PostItem, TradeStatus } from '@/types/database';
+import type {
+  BoardType,
+  CommentItem,
+  PostItem,
+  PostParticipant,
+  TradeStatus,
+} from '@/types/database';
 
 export const POSTS_PAGE_SIZE = 20;
 
@@ -13,6 +19,8 @@ export type PostInput = {
   price: number | null;
   /** 운동게시판만. 다른 게시판은 null */
   sport: string | null;
+  /** 운동게시판 모집글만. null 이면 모집이 아닌 그냥 글 */
+  capacity: number | null;
   /** 이미 업로드가 끝난 사진들의 공개 URL. 최대 4장 */
   imageUrls: string[];
 };
@@ -75,6 +83,7 @@ export async function createPost(input: PostInput): Promise<number> {
       body: input.body.trim(),
       price: input.board === 'market' ? input.price : null,
       sport: input.board === 'workout' ? input.sport : null,
+      capacity: input.board === 'workout' ? input.capacity : null,
       image_urls: input.imageUrls,
     })
     .select('id')
@@ -92,6 +101,7 @@ export async function updatePost(postId: number, input: PostInput): Promise<void
       body: input.body.trim(),
       price: input.board === 'market' ? input.price : null,
       sport: input.board === 'workout' ? input.sport : null,
+      capacity: input.board === 'workout' ? input.capacity : null,
       image_urls: input.imageUrls,
     })
     .eq('id', postId);
@@ -126,6 +136,36 @@ export async function setLiked(postId: number, liked: boolean): Promise<void> {
       .eq('user_id', me);
     if (error) throw error;
   }
+}
+
+/**
+ * 모집글 참여 / 참여 취소.
+ * 인원 수는 DB 트리거가 올리고 내리므로 여기서는 기록만 넣고 뺍니다.
+ * 정원 초과와 자기 글 참여는 DB 정책이 막습니다 (0007_post_join.sql).
+ */
+export async function setJoined(postId: number, joined: boolean): Promise<void> {
+  const me = await getCurrentUserId();
+
+  if (joined) {
+    const { error } = await supabase
+      .from('post_participants')
+      .insert({ post_id: postId, user_id: me });
+    if (error) throw error;
+  } else {
+    const { error } = await supabase
+      .from('post_participants')
+      .delete()
+      .eq('post_id', postId)
+      .eq('user_id', me);
+    if (error) throw error;
+  }
+}
+
+/** 참여자 명단. 누가 오는지 보고 참여를 정할 수 있게 공개합니다. */
+export async function fetchParticipants(postId: number): Promise<PostParticipant[]> {
+  const { data, error } = await supabase.rpc('get_post_participants', { p_post_id: postId });
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function fetchComments(postId: number): Promise<CommentItem[]> {

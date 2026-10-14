@@ -106,6 +106,57 @@ export function useToggleLike() {
   });
 }
 
+/** 모집글 참여자 명단 */
+export function useParticipants(postId: number) {
+  return useQuery({
+    queryKey: queryKeys.participants(postId),
+    queryFn: () => api.fetchParticipants(postId),
+    enabled: Number.isFinite(postId),
+  });
+}
+
+/**
+ * 모집글 참여 / 참여 취소.
+ * 좋아요와 같은 방식으로, 눌린 즉시 화면을 먼저 바꾸고 서버에 보냅니다.
+ * 정원이 찼거나 내 글이면 DB 가 거부하고, 그때 화면이 원래대로 돌아옵니다.
+ */
+export function useToggleJoin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ postId, joined }: { postId: number; joined: boolean }) =>
+      api.setJoined(postId, joined),
+
+    onMutate: async ({ postId, joined }) => {
+      const key = queryKeys.post(postId);
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<PostItem | null>(key);
+      queryClient.setQueryData(key, (old: PostItem | null | undefined) =>
+        old
+          ? {
+              ...old,
+              joined_by_me: joined,
+              participant_count: Math.max(old.participant_count + (joined ? 1 : -1), 0),
+            }
+          : old
+      );
+      return { previous };
+    },
+
+    onError: (_error, { postId }, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(queryKeys.post(postId), context.previous);
+      }
+    },
+
+    onSettled: (_result, _error, { postId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.post(postId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.participants(postId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.allPosts });
+    },
+  });
+}
+
 export function useAddComment(postId: number) {
   const queryClient = useQueryClient();
   return useMutation({

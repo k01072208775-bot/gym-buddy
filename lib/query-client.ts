@@ -29,4 +29,5 @@ export const queryKeys = {
     ['posts', board, sport ?? 'all'] as const,
   post: (postId: number) => ['post', postId] as const,
   comments: (postId: number) => ['comments', postId] as const,
+  participants: (postId: number) => ['participants', postId] as const,
 };
