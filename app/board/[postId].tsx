@@ -225,21 +225,22 @@ export default function PostDetailScreen() {
               <View style={[styles.recruit, { backgroundColor: colors.background }]}>
                 <View style={styles.recruitHead}>
                   <Text style={[Typography.heading, { color: colors.text }]}>
-                    모집 {post.participant_count}/{post.capacity}명
+                    모집 {post.joined_count}/{post.capacity}명
                   </Text>
-                  {post.participant_count >= post.capacity ? (
+                  {post.joined_count >= post.capacity ? (
                     <Text style={[Typography.label, { color: colors.textMuted }]}>마감</Text>
                   ) : (
                     <Text style={[Typography.label, { color: colors.primary }]}>
-                      {post.capacity - post.participant_count}자리 남음
+                      {post.capacity - post.joined_count}자리 남음
                     </Text>
                   )}
                 </View>
 
+                {/* 글쓴이도 운동하러 가는 사람이므로 명단 맨 앞에 둔다 */}
                 <Text style={[Typography.caption, { color: colors.textMuted }]}>
-                  {participants && participants.length > 0
-                    ? participants.map((person) => person.nickname).join(' · ') + ' 참여 중'
-                    : '아직 참여한 사람이 없어요'}
+                  {[post.author_nickname + '(글쓴이)']
+                    .concat((participants ?? []).map((person) => person.nickname))
+                    .join(' · ')}
                 </Text>
 
                 {/* 글쓴이는 주최자라 자기 글에 참여하지 않는다 */}
@@ -251,12 +252,12 @@ export default function PostDetailScreen() {
                         backgroundColor: post.joined_by_me ? colors.chip : colors.primary,
                       },
                       !post.joined_by_me &&
-                        post.participant_count >= post.capacity &&
+                        post.joined_count >= post.capacity &&
                         styles.joinDisabled,
                     ]}
                     disabled={
                       toggleJoin.isPending ||
-                      (!post.joined_by_me && post.participant_count >= post.capacity)
+                      (!post.joined_by_me && post.joined_count >= post.capacity)
                     }
                     onPress={() =>
                       toggleJoin.mutate(
@@ -274,7 +275,7 @@ export default function PostDetailScreen() {
                       ]}>
                       {post.joined_by_me
                         ? '참여 취소'
-                        : post.participant_count >= post.capacity
+                        : post.joined_count >= post.capacity
                           ? '자리가 찼어요'
                           : '참여하기'}
                     </Text>

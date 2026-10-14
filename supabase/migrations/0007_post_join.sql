@@ -5,19 +5,25 @@
 --
 --  탐색 매칭은 두 사람이 서로 수락해야 해서, 가입자가 적을 때는 아무 일도
 --  일어나지 않습니다. 운동게시판 글에 모집 인원을 달면 한 사람이 글을 올리는
---  것만으로 모임이 생깁니다. ("내일 저녁 풋살 2명 구해요 1/2")
+--  것만으로 모임이 생깁니다. ("내일 저녁 풋살, 총 4명 중 1/4")
 --
---  글쓴이는 주최자이므로 인원에 포함하지 않고, 자기 글에는 참여할 수 없습니다.
+--  ★ capacity 는 글쓴이를 포함한 "총 인원" 입니다.
+--    "2명 구해요" 는 총 2명인지 나 말고 2명인지 읽는 사람마다 달라서,
+--    풋살 6명 · 농구 5명처럼 종목에 정해진 총 인원으로 세는 쪽을 택했습니다.
+--
+--  글쓴이는 주최자라 participants 표에 따로 넣지 않고 항상 1명으로 칩니다.
+--  (자기 글에는 참여 버튼이 없고, 참여를 취소해 자기 모임에서 빠질 수도 없습니다)
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
 -- 1. 컬럼
 -- ---------------------------------------------------------------------------
 alter table public.posts
-  add column capacity          int check (capacity between 1 and 20),
+  -- 글쓴이를 포함한 총 인원. 글쓴이 혼자면 모임이 아니므로 최소 2
+  add column capacity          int check (capacity between 2 and 20),
   add column participant_count int not null default 0;
 
--- 모집 인원은 운동게시판에만. (capacity 가 null 이면 그냥 글, 모집이 아님)
+-- 총 인원은 운동게시판에만. (capacity 가 null 이면 그냥 글, 모집이 아님)
 alter table public.posts
   add constraint posts_capacity_only_workout check (board = 'workout' or capacity is null);
 
@@ -81,7 +87,8 @@ create policy participants_select on public.post_participants for select to auth
   using (public.can_view_post(post_id) and not public.is_blocked(user_id));
 
 -- ★ 정원 초과와 남의 이름으로 참여하는 것을 DB 에서 막습니다.
---   앱만 믿으면 정원 2명짜리에 10명이 들어갈 수 있습니다.
+--   앱만 믿으면 총 2명짜리에 10명이 들어갈 수 있습니다.
+--   글쓴이가 이미 한 자리를 차지하므로 + 1 해서 비교합니다.
 create policy participants_insert on public.post_participants for insert to authenticated
   with check (
     user_id = auth.uid()
@@ -92,7 +99,7 @@ create policy participants_insert on public.post_participants for insert to auth
         and p.capacity is not null      -- 모집글만
         and p.author_id <> auth.uid()   -- 자기 글에는 참여하지 않음 (주최자)
     )
-    and public.post_participant_count(post_id)
+    and public.post_participant_count(post_id) + 1
         < (select capacity from public.posts where id = post_id)
   );
 
@@ -127,6 +134,8 @@ returns table (
   trade_status      trade_status,
   capacity          int,
   participant_count int,
+  -- 글쓴이를 포함한 현재 인원. 모집글이 아니면 0
+  joined_count      int,
   joined_by_me      boolean,
   like_count        int,
   comment_count     int,
@@ -139,6 +148,7 @@ language sql stable security definer set search_path = public
 as $fn$
   select p.id, p.board, p.sport, p.author_id, pr.nickname, p.title, p.body, p.image_urls,
          p.price, p.trade_status, p.capacity, p.participant_count,
+         case when p.capacity is null then 0 else p.participant_count + 1 end,
          exists (select 1 from public.post_participants j where j.post_id = p.id and j.user_id = auth.uid()),
          p.like_count, p.comment_count,
          exists (select 1 from public.post_likes l where l.post_id = p.id and l.user_id = auth.uid()),
@@ -170,6 +180,8 @@ returns table (
   trade_status      trade_status,
   capacity          int,
   participant_count int,
+  -- 글쓴이를 포함한 현재 인원. 모집글이 아니면 0
+  joined_count      int,
   joined_by_me      boolean,
   like_count        int,
   comment_count     int,
@@ -182,6 +194,7 @@ language sql stable security definer set search_path = public
 as $fn$
   select p.id, p.board, p.sport, p.author_id, pr.nickname, p.title, p.body, p.image_urls,
          p.price, p.trade_status, p.capacity, p.participant_count,
+         case when p.capacity is null then 0 else p.participant_count + 1 end,
          exists (select 1 from public.post_participants j where j.post_id = p.id and j.user_id = auth.uid()),
          p.like_count, p.comment_count,
          exists (select 1 from public.post_likes l where l.post_id = p.id and l.user_id = auth.uid()),

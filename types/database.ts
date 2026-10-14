@@ -99,9 +99,9 @@ export type Post = {
   /** 장터게시판만. 0 = 나눔 */
   price: number | null;
   trade_status: TradeStatus | null;
-  /** 운동게시판 모집글만. null 이면 모집이 아닌 그냥 글 (0007_post_join.sql) */
+  /** 운동게시판 모집글만. 글쓴이를 포함한 총 인원 (0007_post_join.sql) */
   capacity: number | null;
-  /** 글쓴이는 주최자라 인원에 포함하지 않습니다 */
+  /** 참여 기록 수. 글쓴이는 여기 포함되지 않습니다 (표시에는 joined_count 를 쓰세요) */
   participant_count: number;
   like_count: number;
   comment_count: number;
@@ -127,6 +127,8 @@ export type PostLike = {
 export type PostItem = Omit<Post, 'university'> & {
   author_nickname: string;
   liked_by_me: boolean;
+  /** 글쓴이를 포함한 현재 인원. 화면에는 이 값을 쓰세요 */
+  joined_count: number;
   joined_by_me: boolean;
   is_mine: boolean;
 };

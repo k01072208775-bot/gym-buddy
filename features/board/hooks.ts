@@ -137,6 +137,7 @@ export function useToggleJoin() {
               ...old,
               joined_by_me: joined,
               participant_count: Math.max(old.participant_count + (joined ? 1 : -1), 0),
+              joined_count: Math.max(old.joined_count + (joined ? 1 : -1), 0),
             }
           : old
       );

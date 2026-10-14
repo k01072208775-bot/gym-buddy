@@ -24,10 +24,10 @@ import type { BoardType, PostItem } from '@/types/database';
 
 const SPORT_OPTIONS = WORKOUT_SPORTS.map((sport) => ({ value: sport, label: sport }));
 
-/** 모집 인원 선택지. '0' 은 모집하지 않는 그냥 글 */
+/** 총 인원 선택지 (글쓴이 포함). '0' 은 모집하지 않는 그냥 글 */
 const CAPACITY_OPTIONS = [
   { value: '0', label: '모집 안 함' },
-  ...[1, 2, 3, 4, 5, 6, 8, 10].map((n) => ({ value: String(n), label: n + '명' })),
+  ...[2, 3, 4, 5, 6, 8, 10, 12].map((n) => ({ value: String(n), label: '총 ' + n + '명' })),
 ];
 
 /**
@@ -151,8 +151,8 @@ function PostForm({
 
         {isWorkout ? (
           <Field
-            label="몇 명 구하나요?"
-            hint="인원을 정하면 다른 학생이 글에서 바로 참여할 수 있어요. 글쓴이는 인원에 포함되지 않아요.">
+            label="총 몇 명이 운동하나요?"
+            hint="글쓴이인 나를 포함한 인원이에요. 총 4명을 고르면 3명이 더 참여할 수 있어요.">
             <ChoiceChips
               scroll
               options={CAPACITY_OPTIONS}
