@@ -13,6 +13,8 @@ import {
   View,
 } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { Avatar } from '@/components/ui/avatar';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { Radius, Spacing, Typography } from '@/constants/theme';
@@ -36,6 +38,7 @@ export default function ChatScreen() {
   const { data: matches } = useMatches();
   const partner = matches?.find((match) => match.matchId === matchId)?.partner;
   const refreshMatching = useRefreshMatching();
+  const insets = useSafeAreaInsets();
 
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [draft, setDraft] = useState('');
@@ -151,7 +154,8 @@ export default function ChatScreen() {
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}>
+      // 헤더 높이(기본 44 + 노치)를 빼야 키보드와 입력칸이 겹치지 않습니다
+      keyboardVerticalOffset={insets.top + 44}>
       {header}
 
       <FlatList
@@ -203,7 +207,12 @@ export default function ChatScreen() {
         }}
       />
 
-      <View style={[styles.composer, { borderTopColor: colors.border }]}>
+      {/* 안드로이드 하단 내비게이션 바에 가리지 않도록 안전 영역만큼 띄웁니다 */}
+      <View
+        style={[
+          styles.composer,
+          { borderTopColor: colors.border, paddingBottom: Math.max(insets.bottom, Spacing.sm) },
+        ]}>
         <TextInput
           style={[styles.input, { color: colors.text, backgroundColor: colors.card }]}
           value={draft}

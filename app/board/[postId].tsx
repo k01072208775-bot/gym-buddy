@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { BOARD_LABELS, TRADE_STATUSES, TRADE_STATUS_LABELS } from '@/constants/board';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import {
@@ -52,6 +54,7 @@ export default function PostDetailScreen() {
   const addComment = useAddComment(postId);
   const deleteComment = useDeleteComment(postId);
   const refreshBoard = useRefreshBoard();
+  const insets = useSafeAreaInsets();
 
   const [draft, setDraft] = useState('');
   const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
@@ -156,7 +159,8 @@ export default function PostDetailScreen() {
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.card }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}>
+      // 헤더 높이(기본 44 + 노치)를 빼야 키보드와 입력칸이 겹치지 않습니다
+      keyboardVerticalOffset={insets.top + 44}>
       <Stack.Screen
         options={{
           title: BOARD_LABELS[post.board],
@@ -348,7 +352,12 @@ export default function PostDetailScreen() {
         )}
       />
 
-      <View style={[styles.composer, { borderTopColor: colors.border }]}>
+      {/* 안드로이드 하단 내비게이션 바에 가리지 않도록 안전 영역만큼 띄웁니다 */}
+      <View
+        style={[
+          styles.composer,
+          { borderTopColor: colors.border, paddingBottom: Math.max(insets.bottom, Spacing.sm) },
+        ]}>
         <TextInput
           style={[styles.input, { color: colors.text, backgroundColor: colors.card }]}
           value={draft}
