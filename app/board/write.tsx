@@ -12,9 +12,12 @@ import {
   View,
 } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { ChoiceChips } from '@/components/ui/choice-chips';
 import { Field } from '@/components/ui/field';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { Stepper } from '@/components/ui/stepper';
 import { BOARDS, isBoardType, WORKOUT_SPORTS } from '@/constants/board';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { usePost, useSavePost } from '@/features/board/hooks';
@@ -24,11 +27,15 @@ import type { BoardType, PostItem } from '@/types/database';
 
 const SPORT_OPTIONS = WORKOUT_SPORTS.map((sport) => ({ value: sport, label: sport }));
 
-/** 총 인원 선택지 (글쓴이 포함). '0' 은 모집하지 않는 그냥 글 */
-const CAPACITY_OPTIONS = [
-  { value: '0', label: '모집 안 함' },
-  ...[2, 3, 4, 5, 6, 8, 10, 12].map((n) => ({ value: String(n), label: '총 ' + n + '명' })),
-];
+const RECRUIT_OPTIONS = [
+  { value: 'off', label: '모집 안 함' },
+  { value: 'on', label: '인원 모집' },
+] as const;
+
+/** DB 제약(posts_capacity_check)과 같은 범위여야 합니다 */
+const MIN_CAPACITY = 2;
+const MAX_CAPACITY = 20;
+const DEFAULT_CAPACITY = 4;
 
 /**
  * 글쓰기 / 글 수정 공용 화면.
@@ -82,6 +89,7 @@ function PostForm({
   const colors = useAppColors();
   const router = useRouter();
   const save = useSavePost();
+  const insets = useSafeAreaInsets();
 
   const [board, setBoard] = useState<BoardType>(initial?.board ?? initialBoard);
   const [sport, setSport] = useState<string | null>(initial?.sport ?? initialSport);
@@ -132,7 +140,8 @@ function PostForm({
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}>
+      // 헤더 높이(기본 44 + 노치)를 빼야 키보드와 버튼이 겹치지 않습니다
+      keyboardVerticalOffset={insets.top + 44}>
       <Stack.Screen options={{ title: editingId !== null ? '글 수정' : '글쓰기' }} />
 
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
@@ -152,13 +161,23 @@ function PostForm({
         {isWorkout ? (
           <Field
             label="총 몇 명이 운동하나요?"
-            hint="글쓴이인 나를 포함한 인원이에요. 총 4명을 고르면 3명이 더 참여할 수 있어요.">
+            hint="글쓴이인 나를 포함한 인원이에요. 총 4명이면 3명이 더 참여할 수 있어요.">
             <ChoiceChips
-              scroll
-              options={CAPACITY_OPTIONS}
-              value={String(capacity ?? 0)}
-              onChange={(next) => setCapacity(next === '0' ? null : Number(next))}
+              options={RECRUIT_OPTIONS}
+              value={capacity === null ? 'off' : 'on'}
+              onChange={(next) => setCapacity(next === 'off' ? null : DEFAULT_CAPACITY)}
             />
+            {capacity !== null ? (
+              <View style={styles.stepper}>
+                <Stepper
+                  value={capacity}
+                  onChange={setCapacity}
+                  min={MIN_CAPACITY}
+                  max={MAX_CAPACITY}
+                  format={(n) => '총 ' + n + '명'}
+                />
+              </View>
+            ) : null}
           </Field>
         ) : null}
 
@@ -204,14 +223,25 @@ function PostForm({
         <Text style={[Typography.caption, { color: colors.textMuted }]}>
           같은 학교 학생에게만 보여요. 욕설·비방·거래 사기 글은 신고되면 제재될 수 있어요.
         </Text>
+      </ScrollView>
 
+      {/* 스크롤 영역 안에 두면 키보드가 올라올 때 화면 밖으로 밀려 안 보입니다 */}
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: colors.card,
+            borderTopColor: colors.border,
+            paddingBottom: Math.max(insets.bottom, Spacing.md),
+          },
+        ]}>
         <PrimaryButton
           label={editingId !== null ? '수정하기' : '등록하기'}
           onPress={handleSubmit}
           busy={save.isPending}
           disabled={!canSubmit}
         />
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -219,7 +249,13 @@ function PostForm({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  form: { padding: Spacing.lg, gap: Spacing.xl, paddingBottom: 48 },
+  form: { padding: Spacing.lg, gap: Spacing.xl, paddingBottom: Spacing.xl },
+  stepper: { marginTop: Spacing.sm },
+  footer: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
   input: {
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.lg,
