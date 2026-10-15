@@ -18,6 +18,8 @@ export const SPORTS = [
   '풋살',
   '배드민턴',
   '테니스',
+  '당구',
+  '볼링',
   '복싱',
 ] as const;
 
