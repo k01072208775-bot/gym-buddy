@@ -11,7 +11,7 @@
 
 1. https://supabase.com 에서 프로젝트 생성 (Region: **Northeast Asia (Seoul)**)
 2. **SQL Editor** 에 `supabase/migrations/0001_init.sql` 붙여넣고 Run
-3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql`, `0006_likes_received.sql`, `0007_post_join.sql`, `0008_capacity_total.sql`, `0009_message_reads.sql` 도 순서대로 Run
+3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql`, `0006_likes_received.sql`, `0007_post_join.sql`, `0008_capacity_total.sql`, `0009_message_reads.sql`, `0010_tournaments.sql` 도 순서대로 Run
 4. **Project Settings → API** 에서 Project URL 과 `anon` public key 복사
 
 ### 2) 환경변수
@@ -43,7 +43,10 @@ app/                     ← 라우팅 전용. 화면 조립만 하고 로직은
 ├── board/
 │   ├── [postId].tsx       게시글 상세 + 댓글
 │   └── write.tsx          글쓰기 / 글 수정
-└── profile/edit.tsx       프로필 수정 (사진 업로드 포함)
+├── profile/edit.tsx       프로필 수정 (사진 업로드 포함)
+└── tournament/
+    ├── [id].tsx           대회 상세 + 대진표 + 운영자 도구
+    └── new.tsx            대회 만들기
 
 features/                ← 기능 단위로 자른다 (화면 단위가 아님)
 ├── auth/     api.ts       로그인·로그아웃
@@ -51,7 +54,8 @@ features/                ← 기능 단위로 자른다 (화면 단위가 아님
 ├── matching/ api.ts hooks.ts
 ├── chat/     api.ts
 ├── board/    api.ts hooks.ts   게시판 (자유 / 운동 / 장터)
-└── safety/   api.ts       신고·차단
+├── safety/   api.ts       신고·차단
+└── tournament/ api.ts hooks.ts + bracket-view.tsx(대진표) match-result-modal.tsx
 
 components/ui/           ← 기능과 무관한 공용 컴포넌트 (report-reason-modal = 신고 사유 선택)
                             한 기능에서만 쓰는 컴포넌트는 그 features/<기능>/ 안에 둔다

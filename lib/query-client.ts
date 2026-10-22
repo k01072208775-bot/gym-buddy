@@ -30,4 +30,7 @@ export const queryKeys = {
   post: (postId: number) => ['post', postId] as const,
   comments: (postId: number) => ['comments', postId] as const,
   participants: (postId: number) => ['participants', postId] as const,
+  tournaments: ['tournaments'] as const,
+  tournamentPlayers: (id: number) => ['tournament-players', id] as const,
+  bracket: (id: number) => ['bracket', id] as const,
 };

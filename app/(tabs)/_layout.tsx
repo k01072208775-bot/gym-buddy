@@ -35,6 +35,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen name="board" options={{ title: '게시판' }} />
+      <Tabs.Screen name="tournaments" options={{ title: '대회' }} />
       <Tabs.Screen name="profile" options={{ title: '내 프로필' }} />
     </Tabs>
   );

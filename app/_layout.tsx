@@ -54,6 +54,14 @@ export default function RootLayout() {
                 options={{ headerShown: true, title: '글쓰기' }}
               />
               <Stack.Screen
+                name="tournament/[id]"
+                options={{ headerShown: true, title: '대회' }}
+              />
+              <Stack.Screen
+                name="tournament/new"
+                options={{ headerShown: true, title: '대회 만들기' }}
+              />
+              <Stack.Screen
                 name="profile/edit"
                 options={{ headerShown: true, title: '프로필 수정' }}
               />

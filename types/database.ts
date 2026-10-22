@@ -16,6 +16,7 @@ export type SwipeAction = 'like' | 'pass';
 export type ReportStatus = 'pending' | 'reviewing' | 'resolved' | 'dismissed';
 export type BoardType = 'free' | 'workout' | 'market';
 export type TradeStatus = 'selling' | 'reserved' | 'sold';
+export type TournamentStatus = 'draft' | 'ongoing' | 'finished';
 
 export type Profile = {
   id: string;
@@ -191,6 +192,72 @@ export type LikeReceived = Candidate & {
   liked_at: string;
 };
 
+/** 토너먼트 (0010_tournaments.sql) */
+export type Tournament = {
+  id: number;
+  host_id: string;
+  university: string;
+  title: string;
+  sport: string;
+  venue: string | null;
+  starts_at: string | null;
+  status: TournamentStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+/** 참가자. 앱 계정이 없어도 이름만으로 등록됩니다 */
+export type TournamentPlayer = {
+  id: number;
+  tournament_id: number;
+  name: string;
+  user_id: string | null;
+  created_at: string;
+};
+
+export type TournamentMatch = {
+  id: number;
+  tournament_id: number;
+  /** 1이 첫 판. 숫자가 커질수록 결승에 가깝습니다 */
+  round: number;
+  /** 그 라운드 안에서의 순번 */
+  slot: number;
+  player_a: number | null;
+  player_b: number | null;
+  winner: number | null;
+  score_a: number | null;
+  score_b: number | null;
+  played_at: string | null;
+};
+
+/** get_tournaments RPC 가 돌려주는 목록 한 줄 */
+export type TournamentListItem = {
+  id: number;
+  title: string;
+  sport: string;
+  venue: string | null;
+  starts_at: string | null;
+  status: TournamentStatus;
+  host_nickname: string;
+  is_host: boolean;
+  player_count: number;
+  created_at: string;
+};
+
+/** get_bracket RPC 가 돌려주는 경기 한 칸. 이름이 null 이면 아직 안 정해진 자리 */
+export type BracketMatch = {
+  match_id: number;
+  round: number;
+  slot: number;
+  player_a: number | null;
+  name_a: string | null;
+  player_b: number | null;
+  name_b: string | null;
+  winner: number | null;
+  score_a: number | null;
+  score_b: number | null;
+};
+
 type Table<Row, Required extends keyof Row, Generated extends keyof Row = never> = {
   Row: Row;
   Insert: Pick<Row, Required> & Partial<Omit<Row, Required | Generated>>;
@@ -220,6 +287,14 @@ export type Database = {
       post_comments: Table<PostComment, 'post_id' | 'author_id' | 'body', 'id' | 'created_at'>;
       post_likes: Table<PostLike, 'post_id' | 'user_id', 'created_at'>;
       post_participants: Table<PostParticipation, 'post_id' | 'user_id', 'created_at'>;
+      tournaments: Table<
+        Tournament,
+        'title' | 'sport',
+        'id' | 'host_id' | 'university' | 'created_at' | 'updated_at'
+      >;
+      tournament_players: Table<TournamentPlayer, 'tournament_id' | 'name', 'id' | 'created_at'>;
+      // played_at 은 앱이 직접 넣으므로 자동 생성 목록에 두면 안 됩니다
+      tournament_matches: Table<TournamentMatch, 'tournament_id' | 'round' | 'slot', 'id'>;
     };
     Views: Record<never, never>;
     Functions: {
@@ -256,6 +331,22 @@ export type Database = {
         Args: { p_post_id: number };
         Returns: PostParticipant[];
       };
+      get_tournaments: {
+        Args: Record<string, never>;
+        Returns: TournamentListItem[];
+      };
+      get_bracket: {
+        Args: { p_tournament_id: number };
+        Returns: BracketMatch[];
+      };
+      build_bracket: {
+        Args: { p_tournament_id: number };
+        Returns: void;
+      };
+      advance_winners: {
+        Args: { p_tournament_id: number };
+        Returns: void;
+      };
       get_comments: {
         Args: { p_post_id: number };
         Returns: CommentItem[];
@@ -268,6 +359,7 @@ export type Database = {
       report_status: ReportStatus;
       board_type: BoardType;
       trade_status: TradeStatus;
+      tournament_status: TournamentStatus;
     };
     CompositeTypes: Record<never, never>;
   };
