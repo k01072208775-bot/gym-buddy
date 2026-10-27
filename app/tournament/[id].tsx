@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Stepper } from '@/components/ui/stepper';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { BracketView } from '@/features/tournament/bracket-view';
 import {
@@ -22,6 +23,7 @@ import {
   useBuildBracket,
   useDeleteTournament,
   useRemovePlayer,
+  useSetCapacity,
   useSetMatchResult,
   useTournamentPlayers,
   useTournaments,
@@ -49,16 +51,20 @@ export default function TournamentDetailScreen() {
   const buildBracket = useBuildBracket(tournamentId);
   const setResult = useSetMatchResult(tournamentId);
   const deleteTournament = useDeleteTournament();
+  const setCapacity = useSetCapacity(tournamentId);
 
   const [name, setName] = useState('');
   const [editing, setEditing] = useState<BracketMatch | null>(null);
 
   const isHost = tournament?.is_host ?? false;
   const hasBracket = !!bracket && bracket.length > 0;
+  const playerCount = players?.length ?? 0;
+  const capacity = tournament?.capacity ?? null;
+  const isFull = capacity !== null && playerCount >= capacity;
 
   function handleAddPlayer() {
     const trimmed = name.trim();
-    if (!trimmed || addPlayer.isPending) return;
+    if (!trimmed || addPlayer.isPending || isFull) return;
     addPlayer.mutate(trimmed, {
       onSuccess: () => setName(''),
       onError: (error) => Alert.alert('추가 실패', (error as Error).message),
@@ -133,11 +139,45 @@ export default function TournamentDetailScreen() {
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[Typography.title, { color: colors.text }]}>{tournament.title}</Text>
           <Text style={[Typography.caption, { color: colors.textMuted }]}>
-            {[tournament.venue, `참가 ${tournament.player_count}명`, `주최 ${tournament.host_nickname}`]
+            {[
+              tournament.venue,
+              capacity === null
+                ? `참가 ${playerCount}명`
+                : `참가 ${playerCount}/${capacity}명`,
+              `주최 ${tournament.host_nickname}`,
+            ]
               .filter(Boolean)
               .join(' · ')}
           </Text>
         </View>
+
+        {isHost ? (
+          <View style={styles.section}>
+            <Text style={[Typography.label, { color: colors.textMuted }]}>참가 정원</Text>
+            {capacity === null ? (
+              <Pressable
+                style={[styles.limitToggle, { backgroundColor: colors.chip }]}
+                onPress={() => setCapacity.mutate(Math.max(playerCount, 2))}>
+                <Text style={[Typography.body, { color: colors.text }]}>
+                  제한 없음 · 눌러서 정원 정하기
+                </Text>
+              </Pressable>
+            ) : (
+              <View style={styles.limitRow}>
+                <Stepper
+                  value={capacity}
+                  onChange={(next) => setCapacity.mutate(next)}
+                  min={2}
+                  max={64}
+                  format={(n) => n + '명'}
+                />
+                <Pressable onPress={() => setCapacity.mutate(null)} hitSlop={8}>
+                  <Text style={[Typography.caption, { color: colors.textMuted }]}>제한 없애기</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        ) : null}
 
         {isHost ? (
           <View style={styles.section}>
@@ -147,8 +187,9 @@ export default function TournamentDetailScreen() {
                 style={[styles.input, { color: colors.text, backgroundColor: colors.card }]}
                 value={name}
                 onChangeText={setName}
-                placeholder="이름"
+                placeholder={isFull ? '정원이 찼어요' : '이름'}
                 placeholderTextColor={colors.textMuted}
+                editable={!isFull}
                 maxLength={20}
                 onSubmitEditing={handleAddPlayer}
                 returnKeyType="done"
@@ -157,15 +198,17 @@ export default function TournamentDetailScreen() {
                 style={[
                   styles.add,
                   { backgroundColor: colors.primary },
-                  (!name.trim() || addPlayer.isPending) && styles.disabled,
+                  (!name.trim() || addPlayer.isPending || isFull) && styles.disabled,
                 ]}
-                disabled={!name.trim() || addPlayer.isPending}
+                disabled={!name.trim() || addPlayer.isPending || isFull}
                 onPress={handleAddPlayer}>
                 <Text style={[styles.addText, { color: colors.onPrimary }]}>추가</Text>
               </Pressable>
             </View>
-            <Text style={[Typography.caption, { color: colors.textMuted }]}>
-              앱을 쓰지 않는 사람도 이름만으로 참가할 수 있어요.
+            <Text style={[Typography.caption, { color: isFull ? colors.danger : colors.textMuted }]}>
+              {isFull
+                ? '정원이 찼어요. 더 받으려면 위에서 정원을 늘리세요.'
+                : '앱을 쓰지 않는 사람도 이름만으로 참가할 수 있어요.'}
             </Text>
           </View>
         ) : null}
@@ -173,7 +216,7 @@ export default function TournamentDetailScreen() {
         {players && players.length > 0 ? (
           <View style={styles.section}>
             <Text style={[Typography.label, { color: colors.textMuted }]}>
-              참가자 {players.length}명
+              참가자 {capacity === null ? `${players.length}명` : `${players.length}/${capacity}명`}
             </Text>
             <View style={[styles.card, { backgroundColor: colors.card }]}>
               {players.map((player, index) => (
@@ -253,6 +296,8 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.lg, gap: Spacing.xl },
   card: { borderRadius: Radius.lg, padding: Spacing.lg, gap: Spacing.xs },
   section: { gap: Spacing.sm },
+  limitToggle: { borderRadius: Radius.md, paddingHorizontal: Spacing.lg, paddingVertical: 14 },
+  limitRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md },
   addRow: { flexDirection: 'row', gap: Spacing.sm },
   input: {
     flex: 1,

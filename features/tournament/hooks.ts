@@ -63,6 +63,14 @@ export function useRemovePlayer(tournamentId: number) {
   });
 }
 
+export function useSetCapacity(tournamentId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (capacity: number | null) => api.setTournamentCapacity(tournamentId, capacity),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.tournaments }),
+  });
+}
+
 export function useBuildBracket(tournamentId: number) {
   const queryClient = useQueryClient();
   return useMutation({

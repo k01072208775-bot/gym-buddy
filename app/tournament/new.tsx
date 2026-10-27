@@ -14,12 +14,23 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChoiceChips } from '@/components/ui/choice-chips';
 import { Field } from '@/components/ui/field';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { Stepper } from '@/components/ui/stepper';
 import { WORKOUT_SPORTS } from '@/constants/board';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useCreateTournament } from '@/features/tournament/hooks';
 import { useAppColors } from '@/hooks/use-app-colors';
 
 const SPORT_OPTIONS = WORKOUT_SPORTS.map((sport) => ({ value: sport, label: sport }));
+
+const LIMIT_OPTIONS = [
+  { value: 'off', label: '제한 없음' },
+  { value: 'on', label: '정원 정하기' },
+] as const;
+
+/** DB 제약(tournaments.capacity)과 같은 범위여야 합니다 */
+const MIN_CAPACITY = 2;
+const MAX_CAPACITY = 64;
+const DEFAULT_CAPACITY = 8;
 
 export default function NewTournamentScreen() {
   const colors = useAppColors();
@@ -30,6 +41,8 @@ export default function NewTournamentScreen() {
   const [title, setTitle] = useState('');
   const [sport, setSport] = useState<string | null>(null);
   const [venue, setVenue] = useState('');
+  /** null = 정원 제한 없음 */
+  const [capacity, setCapacity] = useState<number | null>(null);
 
   const inputStyle = [styles.input, { color: colors.text, backgroundColor: colors.card }];
   const canSubmit = title.trim().length >= 2 && sport !== null;
@@ -38,7 +51,7 @@ export default function NewTournamentScreen() {
     if (!canSubmit || !sport) return;
 
     create.mutate(
-      { title, sport, venue: venue || null, startsAt: null },
+      { title, sport, venue: venue || null, startsAt: null, capacity },
       {
         onSuccess: (id) => router.replace(`/tournament/${id}`),
         onError: (error) => Alert.alert('만들기 실패', (error as Error).message),
@@ -67,6 +80,27 @@ export default function NewTournamentScreen() {
 
         <Field label="종목">
           <ChoiceChips options={SPORT_OPTIONS} value={sport} onChange={setSport} />
+        </Field>
+
+        <Field
+          label="참가 정원"
+          hint="당구대 수나 진행 시간에 맞춰 정하세요. 나중에 대회 화면에서 바꿀 수 있어요.">
+          <ChoiceChips
+            options={LIMIT_OPTIONS}
+            value={capacity === null ? 'off' : 'on'}
+            onChange={(next) => setCapacity(next === 'off' ? null : DEFAULT_CAPACITY)}
+          />
+          {capacity !== null ? (
+            <View style={styles.stepper}>
+              <Stepper
+                value={capacity}
+                onChange={setCapacity}
+                min={MIN_CAPACITY}
+                max={MAX_CAPACITY}
+                format={(n) => n + '명'}
+              />
+            </View>
+          ) : null}
         </Field>
 
         <Field label="장소 (선택)" hint="참가자가 어디로 가야 하는지 적어주세요.">
@@ -104,6 +138,7 @@ export default function NewTournamentScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   form: { padding: Spacing.lg, gap: Spacing.xl, paddingBottom: Spacing.xl },
+  stepper: { marginTop: Spacing.sm },
   input: {
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.lg,

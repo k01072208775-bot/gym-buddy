@@ -202,6 +202,8 @@ export type Tournament = {
   venue: string | null;
   starts_at: string | null;
   status: TournamentStatus;
+  /** 참가 정원. null 이면 제한 없음 (0011_tournament_capacity.sql) */
+  capacity: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -241,6 +243,8 @@ export type TournamentListItem = {
   host_nickname: string;
   is_host: boolean;
   player_count: number;
+  /** null 이면 정원 제한 없음 */
+  capacity: number | null;
   created_at: string;
 };
 

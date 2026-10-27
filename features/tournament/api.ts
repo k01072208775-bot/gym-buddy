@@ -19,6 +19,8 @@ export type TournamentInput = {
   sport: string;
   venue: string | null;
   startsAt: string | null;
+  /** 참가 정원. null 이면 제한 없음 */
+  capacity: number | null;
 };
 
 /** 같은 학교 대회 목록. 준비 중인 대회는 주최자에게만 보입니다 */
@@ -37,6 +39,7 @@ export async function createTournament(input: TournamentInput): Promise<number> 
       sport: input.sport,
       venue: input.venue?.trim() || null,
       starts_at: input.startsAt,
+      capacity: input.capacity,
     })
     .select('id')
     .single();
@@ -54,6 +57,21 @@ export async function setTournamentStatus(
   status: TournamentStatus
 ): Promise<void> {
   const { error } = await supabase.from('tournaments').update({ status }).eq('id', tournamentId);
+  if (error) throw error;
+}
+
+/**
+ * 정원 바꾸기. 부스에서 사람이 더 오거나 당구대가 줄면 도중에 조정합니다.
+ * 이미 등록된 인원보다 적게 줄여도 기존 참가자가 밀려나지는 않습니다.
+ */
+export async function setTournamentCapacity(
+  tournamentId: number,
+  capacity: number | null
+): Promise<void> {
+  const { error } = await supabase
+    .from('tournaments')
+    .update({ capacity })
+    .eq('id', tournamentId);
   if (error) throw error;
 }
 

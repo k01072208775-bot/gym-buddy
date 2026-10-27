@@ -12,7 +12,7 @@
 
 1. https://supabase.com 에서 프로젝트 생성 (Region: **Northeast Asia (Seoul)**)
 2. **SQL Editor** 에 `supabase/migrations/0001_init.sql` 붙여넣고 Run
-3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql`, `0006_likes_received.sql`, `0007_post_join.sql`, `0008_capacity_total.sql`, `0009_message_reads.sql`, `0010_tournaments.sql` 도 순서대로 Run
+3. 이어서 `supabase/migrations/0002_competitions.sql`, `0003_boards.sql`, `0004_post_sport.sql`, `0005_post_images.sql`, `0006_likes_received.sql`, `0007_post_join.sql`, `0008_capacity_total.sql`, `0009_message_reads.sql`, `0010_tournaments.sql`, `0011_tournament_capacity.sql` 도 순서대로 Run
 4. **Project Settings → API** 에서 Project URL 과 `anon` public key 복사
 
 ### 2) 환경변수
