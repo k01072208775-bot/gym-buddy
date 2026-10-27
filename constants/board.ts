@@ -36,6 +36,8 @@ export const WORKOUT_SPORTS: readonly string[] = [
   '당구',
   '볼링',
   '테니스',
+  '리그오브레전드',
+  '배틀그라운드',
   '기타',
 ];
 

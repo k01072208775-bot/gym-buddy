@@ -21,6 +21,8 @@ export const SPORTS = [
   '당구',
   '볼링',
   '복싱',
+  '리그오브레전드',
+  '배틀그라운드',
 ] as const;
 
 export const TIME_SLOTS = [
