@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 
+import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTournaments } from '@/features/tournament/hooks';
@@ -48,13 +49,19 @@ export default function TournamentsScreen() {
             />
           }
           ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                {error
-                  ? '불러오지 못했어요.\n당겨서 새로고침 해주세요.'
-                  : '아직 열린 대회가 없어요.\n아래 버튼으로 대회를 만들어보세요.'}
-              </Text>
-            </View>
+            error ? (
+              <EmptyState
+                icon="cloud-offline-outline"
+                title="불러오지 못했어요"
+                description="화면을 아래로 당겨서 새로고침 해주세요."
+              />
+            ) : (
+              <EmptyState
+                icon="trophy-outline"
+                title="아직 열린 대회가 없어요"
+                description="아래 버튼으로 대회를 만들어보세요."
+              />
+            )
           }
           renderItem={({ item }) => (
             <Pressable
@@ -93,7 +100,6 @@ export default function TournamentsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  emptyText: { ...Typography.body, textAlign: 'center' },
   list: { padding: Spacing.lg, paddingBottom: 110, gap: Spacing.sm, flexGrow: 1 },
   row: { borderRadius: Radius.lg, padding: Spacing.md, gap: 3 },
   rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

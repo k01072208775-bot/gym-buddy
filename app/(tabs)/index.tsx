@@ -5,13 +5,13 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 
+import { EmptyState } from '@/components/ui/empty-state';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
-import { Spacing, Typography } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { CandidateCard } from '@/features/matching/candidate-card';
 import { useCandidates, useSwipe } from '@/features/matching/hooks';
 import { useMyProfile } from '@/features/profile/hooks';
@@ -55,13 +55,19 @@ export default function DiscoverScreen() {
             />
           }
           ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                {error
-                  ? '불러오지 못했어요.\n당겨서 새로고침 해주세요.'
-                  : '지금은 보여드릴 사람이 없어요.\n조금 뒤에 다시 확인해주세요.'}
-              </Text>
-            </View>
+            error ? (
+              <EmptyState
+                icon="cloud-offline-outline"
+                title="불러오지 못했어요"
+                description="화면을 아래로 당겨서 새로고침 해주세요."
+              />
+            ) : (
+              <EmptyState
+                icon="people-outline"
+                title="지금은 보여드릴 사람이 없어요"
+                description="조금 뒤에 다시 확인해주세요."
+              />
+            )
           }
           renderItem={({ item }) => (
             <CandidateCard
@@ -115,6 +121,5 @@ export default function DiscoverScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  emptyText: { ...Typography.body, textAlign: 'center' },
   list: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm, paddingBottom: Spacing.xl, gap: Spacing.md, flexGrow: 1 },
 });

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { Avatar } from '@/components/ui/avatar';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Radius, Spacing, Typography } from '@/constants/theme';
@@ -83,15 +84,23 @@ export default function MatchesScreen() {
             </>
           }
           ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                {error
-                  ? '불러오지 못했어요.\n당겨서 새로고침 해주세요.'
-                  : hasLikes
-                    ? '아직 매칭된 사람이 없어요.\n위에서 수락하면 바로 채팅할 수 있어요.'
-                    : '아직 매칭된 사람이 없어요.\n탐색 탭에서 마음에 드는 사람을 찾아보세요.'}
-              </Text>
-            </View>
+            error ? (
+              <EmptyState
+                icon="cloud-offline-outline"
+                title="불러오지 못했어요"
+                description="화면을 아래로 당겨서 새로고침 해주세요."
+              />
+            ) : (
+              <EmptyState
+                icon="heart-outline"
+                title="아직 매칭된 사람이 없어요"
+                description={
+                  hasLikes
+                    ? '위에서 수락하면 바로 채팅할 수 있어요.'
+                    : '탐색 탭에서 마음에 드는 사람을 찾아보세요.'
+                }
+              />
+            )
           }
           renderItem={({ item }) => (
             <Pressable
@@ -149,7 +158,6 @@ export default function MatchesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  emptyText: { ...Typography.body, textAlign: 'center' },
   list: { padding: Spacing.lg, paddingBottom: Spacing.xl, gap: Spacing.sm, flexGrow: 1 },
   listTitle: { paddingBottom: Spacing.sm },
   row: {

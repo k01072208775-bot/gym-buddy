@@ -1,7 +1,23 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
 import { useLikesReceived, useMatches } from '@/features/matching/hooks';
 import { useAppColors } from '@/hooks/use-app-colors';
+
+/** 선택됐을 때와 아닐 때 아이콘을 바꿔 지금 어느 탭인지 한눈에 보이게 합니다 */
+function tabIcon(active: keyof typeof Ionicons.glyphMap, inactive: keyof typeof Ionicons.glyphMap) {
+  function TabIcon({ focused }: { focused: boolean }) {
+    const colors = useAppColors();
+    return (
+      <Ionicons
+        name={focused ? active : inactive}
+        size={24}
+        color={focused ? colors.primary : colors.textMuted}
+      />
+    );
+  }
+  return TabIcon;
+}
 
 export default function TabsLayout() {
   const colors = useAppColors();
@@ -25,18 +41,31 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
       }}>
-      <Tabs.Screen name="index" options={{ title: '탐색' }} />
+      <Tabs.Screen
+        name="index"
+        options={{ title: '탐색', tabBarIcon: tabIcon('search', 'search-outline') }}
+      />
       <Tabs.Screen
         name="matches"
         options={{
           title: '매칭',
+          tabBarIcon: tabIcon('heart', 'heart-outline'),
           tabBarBadge: waitingCount > 0 ? waitingCount : undefined,
           tabBarBadgeStyle: { backgroundColor: colors.primary, color: colors.onPrimary, fontWeight: '800' },
         }}
       />
-      <Tabs.Screen name="board" options={{ title: '게시판' }} />
-      <Tabs.Screen name="tournaments" options={{ title: '대회' }} />
-      <Tabs.Screen name="profile" options={{ title: '내 프로필' }} />
+      <Tabs.Screen
+        name="board"
+        options={{ title: '게시판', tabBarIcon: tabIcon('chatbubbles', 'chatbubbles-outline') }}
+      />
+      <Tabs.Screen
+        name="tournaments"
+        options={{ title: '대회', tabBarIcon: tabIcon('trophy', 'trophy-outline') }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ title: '내 프로필', tabBarIcon: tabIcon('person', 'person-outline') }}
+      />
     </Tabs>
   );
 }

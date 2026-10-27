@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { ChoiceChips } from '@/components/ui/choice-chips';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { BOARDS, TRADE_STATUS_LABELS, WORKOUT_SPORTS } from '@/constants/board';
 import { Radius, Spacing, Typography, type AppPalette } from '@/constants/theme';
@@ -110,13 +111,19 @@ export default function BoardScreen() {
             isFetchingNextPage ? <ActivityIndicator color={colors.primary} /> : undefined
           }
           ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                {error
-                  ? '불러오지 못했어요.\n당겨서 새로고침 해주세요.'
-                  : '아직 글이 없어요.\n첫 글을 남겨보세요!'}
-              </Text>
-            </View>
+            error ? (
+              <EmptyState
+                icon="cloud-offline-outline"
+                title="불러오지 못했어요"
+                description="화면을 아래로 당겨서 새로고침 해주세요."
+              />
+            ) : (
+              <EmptyState
+                icon="create-outline"
+                title="아직 글이 없어요"
+                description="첫 글을 남겨보세요!"
+              />
+            )
           }
           renderItem={({ item }) => (
             <PostRow post={item} colors={colors} onPress={() => router.push(`/board/${item.id}`)} />
@@ -201,7 +208,6 @@ const styles = StyleSheet.create({
   boardTabActive: { fontWeight: '800' },
   sportBar: { paddingTop: Spacing.xs, paddingBottom: Spacing.md },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  emptyText: { textAlign: 'center', lineHeight: 22 },
   list: { padding: Spacing.lg, paddingBottom: 110, gap: Spacing.sm, flexGrow: 1 },
   row: {
     flexDirection: 'row',
