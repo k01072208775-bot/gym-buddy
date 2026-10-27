@@ -41,7 +41,11 @@ export default function TournamentsScreen() {
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.list}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => void refetch()}
+              tintColor={colors.primary}
+            />
           }
           ListEmptyComponent={
             <View style={styles.center}>

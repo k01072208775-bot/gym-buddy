@@ -68,7 +68,7 @@ export default function MatchesScreen() {
             <RefreshControl
               refreshing={isRefetching}
               // 받은 관심과 매칭 목록을 함께 새로 불러온다
-              onRefresh={refreshMatching}
+              onRefresh={() => void refreshMatching()}
               tintColor={colors.primary}
             />
           }

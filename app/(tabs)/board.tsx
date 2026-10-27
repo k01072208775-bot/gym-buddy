@@ -98,7 +98,7 @@ export default function BoardScreen() {
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
-              onRefresh={refetch}
+              onRefresh={() => void refetch()}
               tintColor={colors.primary}
             />
           }
@@ -107,7 +107,7 @@ export default function BoardScreen() {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();
           }}
           ListFooterComponent={
-            isFetchingNextPage ? <ActivityIndicator color={colors.primary} /> : null
+            isFetchingNextPage ? <ActivityIndicator color={colors.primary} /> : undefined
           }
           ListEmptyComponent={
             <View style={styles.center}>

@@ -1,9 +1,10 @@
 # gym-buddy
 
-같은 학교 학생끼리 운동 파트너를 찾는 앱. **Expo SDK 57** (React Native 0.86) + Supabase.
+같은 학교 학생끼리 운동 파트너를 찾는 앱. **Expo SDK 58** (React Native 0.88) + Supabase.
 
-> 2026-09-15 에 SDK 54 → 57 로 올렸습니다. 아이폰 Expo Go 는 최신 SDK(57)만 지원하고
-> 예전 버전을 설치할 수 없기 때문입니다. 테스트 폰의 Expo Go 도 최신으로 업데이트하세요.
+> 2026-10-27 에 SDK 57 → 58 로 올렸습니다. Expo Go 는 최신 SDK 만 지원해서,
+> 폰의 Expo Go 가 자동 업데이트되면 예전 SDK 로 만든 프로젝트가 열리지 않습니다.
+> 앞으로도 "버전이 안 맞는다" 는 말이 나오면 이 업그레이드부터 하세요.
 
 ## 1. 처음 실행하기
 
@@ -26,8 +27,11 @@ cp .env.example .env.local
 ### 3) 실행
 
 ```bash
-npx expo start --tunnel
+npx expo start --tunnel ngrok
 ```
+
+> SDK 58 부터 그냥 `--tunnel` 은 Expo 계정 로그인을 요구합니다.
+> 로그인 없이 쓰려면 위처럼 뒤에 `ngrok` 을 붙이세요.
 
 폰의 **Expo Go** 앱에서 "Enter URL manually" 로 터널 주소를 입력합니다.
 같은 공유기를 쓰는 환경이면 `--tunnel` 없이 `npm start` 로도 됩니다.
@@ -129,9 +133,9 @@ Supabase 에 0001~0009 실행 완료 (2026-10-15 에 함수 교체까지 확인)
 2. `git clone https://github.com/k01072208775-bot/gym-buddy.git` → 그 폴더에서 `npm install`
 3. **`.env.local` 을 직접 만든다** — Supabase 키가 들어 있어 git 에 올라가지 않습니다.
    `.env.example` 을 복사해 실제 값을 채우세요. 이 파일이 없으면 로그인부터 안 됩니다.
-4. `npx expo start --tunnel` → 터미널의 QR 을 폰 Expo Go 로 찍습니다
+4. `npx expo start --tunnel ngrok` → 터미널의 QR 을 폰 Expo Go 로 찍습니다
 
-`npx expo login` 은 안 해도 됩니다. 하면 Expo Go 첫 화면에 프로젝트가 자동으로 뜨는 편의만 생깁니다.
+SDK 58 부터 그냥 `--tunnel` 은 Expo 계정 로그인을 요구합니다. 위처럼 `ngrok` 을 붙이면 로그인 없이 됩니다.
 
 ### 작업한 걸 저장하고 올릴 때
 
