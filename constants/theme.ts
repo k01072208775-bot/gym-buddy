@@ -96,6 +96,22 @@ export const AppColors = {
 
 export type AppPalette = typeof palette;
 
+/**
+ * 프로필 사진이 없을 때 쓰는 동그라미 색. 배경과 그 위 글자색이 한 쌍입니다.
+ *
+ * 전부 같은 회색으로 두면 목록에서 누가 누군지 구분이 안 됩니다.
+ * 닉네임으로 색을 정하므로 같은 사람은 어느 화면에서나 같은 색으로 보입니다.
+ */
+export const AvatarColors = [
+  { bg: '#E3F6EC', text: '#007A47' },
+  { bg: '#E4EEFF', text: '#1E4FA3' },
+  { bg: '#F0E9FF', text: '#5B3CB8' },
+  { bg: '#FFE9F0', text: '#A62B5B' },
+  { bg: '#FFF0DB', text: '#8A5A00' },
+  { bg: '#DDF4F5', text: '#0F6E73' },
+  { bg: '#FFE8E3', text: '#AA3C22' },
+] as const;
+
 /** 모서리 둥글기. 전체적으로 넉넉하게 둥글립니다. */
 export const Radius = {
   sm: 8,

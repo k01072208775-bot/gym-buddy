@@ -4,6 +4,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'rea
 
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useAppColors } from '@/hooks/use-app-colors';
+import { avatarColor } from '@/lib/avatar-color';
 import { useUploadAvatar } from './hooks';
 
 const SIZE = 104;
@@ -16,6 +17,9 @@ const SIZE = 104;
 export function AvatarPicker({ url, nickname }: { url: string | null; nickname: string }) {
   const colors = useAppColors();
   const upload = useUploadAvatar();
+
+  // Avatar 와 같은 규칙으로 색을 고릅니다 (같은 사람은 같은 색)
+  const palette = avatarColor(nickname);
 
   async function handlePick() {
     // SDK 54 부터 iOS 는 권한을 먼저 직접 물어야 합니다 (안 그러면 갑자기 권한창이 뜸)
@@ -41,13 +45,17 @@ export function AvatarPicker({ url, nickname }: { url: string | null; nickname: 
   return (
     <View style={styles.wrap}>
       <Pressable onPress={handlePick} disabled={upload.isPending}>
-        <View style={[styles.circle, { backgroundColor: colors.chip, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.circle,
+            { backgroundColor: url ? colors.chip : palette.bg, borderColor: colors.border },
+          ]}>
           {upload.isPending ? (
             <ActivityIndicator color={colors.primary} />
           ) : url ? (
             <Image source={{ uri: url }} style={styles.image} contentFit="cover" transition={150} />
           ) : (
-            <Text style={[styles.initial, { color: colors.textMuted }]}>
+            <Text style={[styles.initial, { color: palette.text }]}>
               {nickname.slice(0, 1)}
             </Text>
           )}
