@@ -84,7 +84,7 @@ export default function NewTournamentScreen() {
 
         <Field
           label="참가 정원"
-          hint="당구대 수나 진행 시간에 맞춰 정하세요. 나중에 대회 화면에서 바꿀 수 있어요.">
+          hint="나중에 대회 화면에서 바꿀 수 있어요.">
           <ChoiceChips
             options={LIMIT_OPTIONS}
             value={capacity === null ? 'off' : 'on'}

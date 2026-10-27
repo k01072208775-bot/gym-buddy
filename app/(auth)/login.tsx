@@ -66,7 +66,7 @@ export default function LoginScreen() {
         style={styles.inner}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.hero}>
-          <Text style={[Typography.label, { color: colors.primary }]}>GYM BUDDY</Text>
+          <Text style={[Typography.label, { color: colors.primary }]}>오운족</Text>
           <Text style={[styles.title, { color: colors.text }]}>
             같이 운동할 사람,{'\n'}
             <Text style={{ color: colors.primary }}>우리 학교</Text> 안에서

@@ -21,7 +21,7 @@ export function AvatarPicker({ url, nickname }: { url: string | null; nickname: 
     // SDK 54 부터 iOS 는 권한을 먼저 직접 물어야 합니다 (안 그러면 갑자기 권한창이 뜸)
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('사진 권한이 필요해요', '설정에서 gym-buddy 의 사진 접근을 켜주세요.');
+      Alert.alert('사진 권한이 필요해요', '설정에서 오운족의 사진 접근을 켜주세요.');
       return;
     }
 
