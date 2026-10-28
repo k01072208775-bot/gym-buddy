@@ -2,7 +2,6 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -15,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChoiceChips } from '@/components/ui/choice-chips';
+import { showMessage } from '@/lib/dialog';
 import { Field } from '@/components/ui/field';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Stepper } from '@/components/ui/stepper';
@@ -128,7 +128,7 @@ function PostForm({
           if (editingId !== null) router.back();
           else router.replace(`/board/${postId}`);
         },
-        onError: (err) => Alert.alert('저장 실패', (err as Error).message),
+        onError: (err) => showMessage('저장 실패', (err as Error).message),
       }
     );
   }

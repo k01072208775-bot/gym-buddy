@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '@/components/ui/avatar';
+import { showMessage } from '@/lib/dialog';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { TagRow } from '@/components/ui/tag';
@@ -24,7 +25,7 @@ export default function ProfileScreen() {
       await signOut();
       // 세션이 사라지면 AuthGate 가 로그인 화면으로 되돌립니다.
     } catch (error) {
-      Alert.alert('로그아웃 실패', (error as Error).message);
+      showMessage('로그아웃 실패', (error as Error).message);
     }
   }
 

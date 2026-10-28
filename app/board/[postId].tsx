@@ -2,7 +2,6 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -14,6 +13,7 @@ import {
 } from 'react-native';
 
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
+import { confirmMessage, showMessage } from '@/lib/dialog';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BOARD_LABELS, TRADE_STATUSES, TRADE_STATUS_LABELS } from '@/constants/board';
@@ -81,30 +81,33 @@ export default function PostDetailScreen() {
       setReportTarget({ authorId: post.author_id, postId: post.id });
       return;
     }
-    Alert.alert('내 글', undefined, [
-      {
-        text: '수정',
-        onPress: () =>
-          router.push({ pathname: '/board/write', params: { postId: String(post.id) } }),
-      },
-      { text: '삭제', style: 'destructive', onPress: confirmDeletePost },
-      { text: '취소', style: 'cancel' },
-    ]);
+    // 수정할지 삭제할지 차례로 묻습니다. 웹에는 세 갈래 선택창이 없습니다
+    confirmMessage({
+      title: '내 글을 수정할까요?',
+      message: '취소를 누르면 삭제할지 다시 묻습니다.',
+      confirmLabel: '수정',
+    }).then((edit) => {
+      if (edit) {
+        router.push({ pathname: '/board/write', params: { postId: String(post.id) } });
+        return;
+      }
+      confirmDeletePost();
+    });
   }
 
-  function confirmDeletePost() {
-    Alert.alert('글을 삭제할까요?', '댓글도 함께 삭제되고 되돌릴 수 없어요.', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () =>
-          deletePost.mutate(postId, {
-            onSuccess: () => router.back(),
-            onError: (err) => Alert.alert('삭제 실패', (err as Error).message),
-          }),
-      },
-    ]);
+  async function confirmDeletePost() {
+    const ok = await confirmMessage({
+      title: '글을 삭제할까요?',
+      message: '댓글도 함께 삭제되고 되돌릴 수 없어요.',
+      confirmLabel: '삭제',
+      destructive: true,
+    });
+    if (!ok) return;
+
+    deletePost.mutate(postId, {
+      onSuccess: () => router.back(),
+      onError: (err) => showMessage('삭제 실패', (err as Error).message),
+    });
   }
 
   function openCommentMenu(comment: CommentItem) {
@@ -112,17 +115,16 @@ export default function PostDetailScreen() {
       setReportTarget({ authorId: comment.author_id, commentId: comment.id });
       return;
     }
-    Alert.alert('댓글을 삭제할까요?', undefined, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () =>
-          deleteComment.mutate(comment.id, {
-            onError: (err) => Alert.alert('삭제 실패', (err as Error).message),
-          }),
-      },
-    ]);
+    confirmMessage({
+      title: '댓글을 삭제할까요?',
+      confirmLabel: '삭제',
+      destructive: true,
+    }).then((ok) => {
+      if (!ok) return;
+      deleteComment.mutate(comment.id, {
+        onError: (err) => showMessage('삭제 실패', (err as Error).message),
+      });
+    });
   }
 
   async function handleReport(reason: string) {
@@ -138,11 +140,11 @@ export default function PostDetailScreen() {
         commentId: target.commentId,
       });
       await refreshBoard();
-      Alert.alert('신고가 접수됐어요', '이제 서로의 글과 댓글이 보이지 않아요.');
+      showMessage('신고가 접수됐어요', '이제 서로의 글과 댓글이 보이지 않아요.');
       // 글 작성자를 차단했다면 이 글은 더 이상 볼 수 없으므로 목록으로 돌아간다
       if (target.authorId === post?.author_id) router.back();
     } catch (err) {
-      Alert.alert('신고 실패', (err as Error).message);
+      showMessage('신고 실패', (err as Error).message);
     }
   }
 
@@ -151,7 +153,7 @@ export default function PostDetailScreen() {
     if (!body || addComment.isPending) return;
     addComment.mutate(body, {
       onSuccess: () => setDraft(''),
-      onError: (err) => Alert.alert('댓글 등록 실패', (err as Error).message),
+      onError: (err) => showMessage('댓글 등록 실패', (err as Error).message),
     });
   }
 
@@ -204,7 +206,7 @@ export default function PostDetailScreen() {
                         onPress={() =>
                           setTradeStatus.mutate(
                             { postId: post.id, status },
-                            { onError: (err) => Alert.alert('변경 실패', (err as Error).message) }
+                            { onError: (err) => showMessage('변경 실패', (err as Error).message) }
                           )
                         }
                         style={[
@@ -268,7 +270,7 @@ export default function PostDetailScreen() {
                         { postId: post.id, joined: !post.joined_by_me },
                         {
                           onError: (err) =>
-                            Alert.alert('처리 실패', (err as Error).message),
+                            showMessage('처리 실패', (err as Error).message),
                         }
                       )
                     }>

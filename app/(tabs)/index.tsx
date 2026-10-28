@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -9,6 +8,7 @@ import {
 } from 'react-native';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { showMessage } from '@/lib/dialog';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Spacing } from '@/constants/theme';
@@ -95,10 +95,10 @@ export default function DiscoverScreen() {
       {
         onSuccess: (result) => {
           if (result.matched) {
-            Alert.alert('매칭 성사!', `${candidate.nickname} 님과 서로 관심이 있어요.`);
+            showMessage('매칭 성사!', `${candidate.nickname} 님과 서로 관심이 있어요.`);
           }
         },
-        onError: (err) => Alert.alert('처리 실패', (err as Error).message),
+        onError: (err) => showMessage('처리 실패', (err as Error).message),
       }
     );
   }
@@ -111,9 +111,9 @@ export default function DiscoverScreen() {
     try {
       await reportAndBlock({ targetId: target.id, reason });
       await refetch();
-      Alert.alert('신고가 접수됐어요', '이제 서로에게 보이지 않아요.');
+      showMessage('신고가 접수됐어요', '이제 서로에게 보이지 않아요.');
     } catch (err) {
-      Alert.alert('신고 실패', (err as Error).message);
+      showMessage('신고 실패', (err as Error).message);
     }
   }
 }

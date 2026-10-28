@@ -1,7 +1,8 @@
 import { useRouter } from 'expo-router';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Spacing, Typography } from '@/constants/theme';
+import { confirmMessage, showMessage } from '@/lib/dialog';
 import { useAppColors } from '@/hooks/use-app-colors';
 import { formatRelativeTime } from '@/lib/format';
 import type { LikeReceived } from '@/types/database';
@@ -35,12 +36,15 @@ export function LikesReceivedSection({
         onSuccess: (result) => {
           if (!result.matched || result.matchId === undefined) return;
           const matchId = result.matchId;
-          Alert.alert('매칭 성사!', `${person.nickname} 님과 이제 채팅할 수 있어요.`, [
-            { text: '나중에', style: 'cancel' },
-            { text: '채팅하기', onPress: () => router.push(`/chat/${matchId}`) },
-          ]);
+          confirmMessage({
+            title: '매칭 성사!',
+            message: `${person.nickname} 님과 이제 채팅할 수 있어요.`,
+            confirmLabel: '채팅하기',
+          }).then((go) => {
+            if (go) router.push(`/chat/${matchId}`);
+          });
         },
-        onError: (err) => Alert.alert('수락 실패', (err as Error).message),
+        onError: (err) => showMessage('수락 실패', (err as Error).message),
       }
     );
   }
@@ -48,7 +52,7 @@ export function LikesReceivedSection({
   function handleDecline(person: LikeReceived) {
     swipe.mutate(
       { toUser: person.id, action: 'pass' },
-      { onError: (err) => Alert.alert('처리 실패', (err as Error).message) }
+      { onError: (err) => showMessage('처리 실패', (err as Error).message) }
     );
   }
 

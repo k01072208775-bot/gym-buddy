@@ -1,7 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -12,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChoiceChips } from '@/components/ui/choice-chips';
+import { showMessage } from '@/lib/dialog';
 import { Field } from '@/components/ui/field';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Stepper } from '@/components/ui/stepper';
@@ -54,7 +54,7 @@ export default function NewTournamentScreen() {
       { title, sport, venue: venue || null, startsAt: null, capacity },
       {
         onSuccess: (id) => router.replace(`/tournament/${id}`),
-        onError: (error) => Alert.alert('만들기 실패', (error as Error).message),
+        onError: (error) => showMessage('만들기 실패', (error as Error).message),
       }
     );
   }

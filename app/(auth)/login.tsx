@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -14,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { showMessage } from '@/lib/dialog';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { isUniversityEmail } from '@/constants/workout';
 import { signInWithPassword, signUpWithPassword, toKoreanAuthError } from '@/features/auth/api';
@@ -49,7 +49,7 @@ export default function LoginScreen() {
 
   async function handleSubmit() {
     if (mode === 'signup' && !isUniversityEmail(email)) {
-      Alert.alert('학교 이메일이 필요해요', '재학 중인 학교 이메일(.ac.kr)로 가입해주세요.');
+      showMessage('학교 이메일이 필요해요', '재학 중인 학교 이메일(.ac.kr)로 가입해주세요.');
       return;
     }
 
@@ -62,7 +62,7 @@ export default function LoginScreen() {
       }
       // 세션이 생기면 SessionProvider → AuthGate 가 알아서 다음 화면으로 보냅니다.
     } catch (error) {
-      Alert.alert(mode === 'signup' ? '가입 실패' : '로그인 실패', toKoreanAuthError(error));
+      showMessage(mode === 'signup' ? '가입 실패' : '로그인 실패', toKoreanAuthError(error));
     } finally {
       setBusy(false);
     }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ChipGroup } from '@/components/ui/chip-group';
+import { showMessage } from '@/lib/dialog';
 import { Field } from '@/components/ui/field';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Radius, Spacing, Typography } from '@/constants/theme';
@@ -78,7 +79,7 @@ export function ProfileForm({
       },
       {
         onSuccess: () => onSaved?.(),
-        onError: (error) => Alert.alert('저장 실패', (error as Error).message),
+        onError: (error) => showMessage('저장 실패', (error as Error).message),
       }
     );
   }

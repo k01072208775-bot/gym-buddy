@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 
 import { Avatar } from '@/components/ui/avatar';
+import { showMessage } from '@/lib/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -43,9 +43,9 @@ export default function MatchesScreen() {
     try {
       await reportAndBlock({ targetId: target.id, reason });
       await refreshMatching();
-      Alert.alert('신고가 접수됐어요', '이제 서로에게 보이지 않아요.');
+      showMessage('신고가 접수됐어요', '이제 서로에게 보이지 않아요.');
     } catch (err) {
-      Alert.alert('신고 실패', (err as Error).message);
+      showMessage('신고 실패', (err as Error).message);
     }
   }
 

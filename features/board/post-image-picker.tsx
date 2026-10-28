@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { showMessage } from '@/lib/dialog';
 import { useAppColors } from '@/hooks/use-app-colors';
 import { MAX_POST_IMAGES } from './api';
 import { useUploadPostImage } from './hooks';
@@ -31,7 +32,7 @@ export function PostImagePicker({
 
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('사진 권한이 필요해요', '설정에서 오운족의 사진 접근을 켜주세요.');
+      showMessage('사진 권한이 필요해요', '설정에서 오운족의 사진 접근을 켜주세요.');
       return;
     }
 
@@ -50,7 +51,7 @@ export function PostImagePicker({
       onChange([...urls, ...uploaded]);
     } catch (error) {
       // 여러 장 중 일부만 올라갔어도 올라간 것까지는 살립니다
-      Alert.alert('사진 업로드 실패', (error as Error).message);
+      showMessage('사진 업로드 실패', (error as Error).message);
     }
   }
 

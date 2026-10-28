@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { showMessage } from '@/lib/dialog';
 import { useAppColors } from '@/hooks/use-app-colors';
 import { avatarColor } from '@/lib/avatar-color';
 import { useUploadAvatar } from './hooks';
@@ -25,7 +26,7 @@ export function AvatarPicker({ url, nickname }: { url: string | null; nickname: 
     // SDK 54 부터 iOS 는 권한을 먼저 직접 물어야 합니다 (안 그러면 갑자기 권한창이 뜸)
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('사진 권한이 필요해요', '설정에서 오운족의 사진 접근을 켜주세요.');
+      showMessage('사진 권한이 필요해요', '설정에서 오운족의 사진 접근을 켜주세요.');
       return;
     }
 
@@ -38,7 +39,7 @@ export function AvatarPicker({ url, nickname }: { url: string | null; nickname: 
     if (result.canceled) return;
 
     upload.mutate(result.assets[0].uri, {
-      onError: (error) => Alert.alert('사진 업로드 실패', (error as Error).message),
+      onError: (error) => showMessage('사진 업로드 실패', (error as Error).message),
     });
   }
 

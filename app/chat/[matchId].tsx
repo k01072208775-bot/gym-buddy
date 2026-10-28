@@ -2,7 +2,6 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +15,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/ui/avatar';
+import { showMessage } from '@/lib/dialog';
 import { ReportReasonModal } from '@/components/ui/report-reason-modal';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { fetchMessages, markMatchRead, sendMessage, subscribeToMessages } from '@/features/chat/api';
@@ -65,7 +65,7 @@ export default function ChatScreen() {
       .then((rows) => {
         if (!cancelled) setMessages(rows);
       })
-      .catch((error) => Alert.alert('불러오기 실패', (error as Error).message));
+      .catch((error) => showMessage('불러오기 실패', (error as Error).message));
 
     // 실시간 수신. cleanup 에서 반드시 구독을 끊어야 화면을 옮길 때 누수가 없습니다.
     const unsubscribe = subscribeToMessages(matchId, (incoming) => {
@@ -94,7 +94,7 @@ export default function ChatScreen() {
         prev?.some((m) => m.id === saved.id) ? prev : [...(prev ?? []), saved]
       );
     } catch (error) {
-      Alert.alert('전송 실패', (error as Error).message);
+      showMessage('전송 실패', (error as Error).message);
     } finally {
       setSending(false);
     }
@@ -107,11 +107,11 @@ export default function ChatScreen() {
     try {
       await reportAndBlock({ targetId: partner.id, reason });
       await refreshMatching();
-      Alert.alert('신고가 접수됐어요', '이제 서로에게 보이지 않아요.');
+      showMessage('신고가 접수됐어요', '이제 서로에게 보이지 않아요.');
       // 차단했으므로 이 대화방은 더 이상 열 수 없다
       router.back();
     } catch (error) {
-      Alert.alert('신고 실패', (error as Error).message);
+      showMessage('신고 실패', (error as Error).message);
     }
   }
 

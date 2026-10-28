@@ -2,7 +2,6 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Stepper } from '@/components/ui/stepper';
+import { confirmMessage, showMessage } from '@/lib/dialog';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { BracketView } from '@/features/tournament/bracket-view';
 import {
@@ -67,44 +67,40 @@ export default function TournamentDetailScreen() {
     if (!trimmed || addPlayer.isPending || isFull) return;
     addPlayer.mutate(trimmed, {
       onSuccess: () => setName(''),
-      onError: (error) => Alert.alert('추가 실패', (error as Error).message),
+      onError: (error) => showMessage('추가 실패', (error as Error).message),
     });
   }
 
-  function handleBuildBracket() {
+  async function handleBuildBracket() {
     const count = players?.length ?? 0;
-    Alert.alert(
-      hasBracket ? '대진표를 다시 만들까요?' : '대진표를 만들까요?',
-      hasBracket
+    const ok = await confirmMessage({
+      title: hasBracket ? '대진표를 다시 만들까요?' : '대진표를 만들까요?',
+      message: hasBracket
         ? `지금까지 입력한 경기 결과가 모두 지워집니다. (참가자 ${count}명)`
         : `참가자 ${count}명으로 대진을 짭니다. 인원이 2·4·8명이 아니면 부전승이 생깁니다.`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: hasBracket ? '다시 만들기' : '만들기',
-          style: hasBracket ? 'destructive' : 'default',
-          onPress: () =>
-            buildBracket.mutate(undefined, {
-              onError: (error) => Alert.alert('실패', (error as Error).message),
-            }),
-        },
-      ]
-    );
+      confirmLabel: hasBracket ? '다시 만들기' : '만들기',
+      destructive: hasBracket,
+    });
+    if (!ok) return;
+
+    buildBracket.mutate(undefined, {
+      onError: (error) => showMessage('실패', (error as Error).message),
+    });
   }
 
-  function confirmDelete() {
-    Alert.alert('대회를 삭제할까요?', '참가자와 경기 기록도 함께 사라지고 되돌릴 수 없어요.', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () =>
-          deleteTournament.mutate(tournamentId, {
-            onSuccess: () => router.back(),
-            onError: (error) => Alert.alert('삭제 실패', (error as Error).message),
-          }),
-      },
-    ]);
+  async function confirmDelete() {
+    const ok = await confirmMessage({
+      title: '대회를 삭제할까요?',
+      message: '참가자와 경기 기록도 함께 사라지고 되돌릴 수 없어요.',
+      confirmLabel: '삭제',
+      destructive: true,
+    });
+    if (!ok) return;
+
+    deleteTournament.mutate(tournamentId, {
+      onSuccess: () => router.back(),
+      onError: (error) => showMessage('삭제 실패', (error as Error).message),
+    });
   }
 
   if (!tournament) {
@@ -281,7 +277,7 @@ export default function TournamentDetailScreen() {
             { matchId: editing.match_id, ...input },
             {
               onSuccess: () => setEditing(null),
-              onError: (error) => Alert.alert('저장 실패', (error as Error).message),
+              onError: (error) => showMessage('저장 실패', (error as Error).message),
             }
           );
         }}

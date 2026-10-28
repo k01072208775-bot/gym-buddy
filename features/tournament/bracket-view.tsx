@@ -62,7 +62,15 @@ export function BracketView({
                   />
                   <View style={[styles.divider, { backgroundColor: colors.border }]} />
                   <Side
-                    name={match.player_a !== null && match.player_b === null ? '부전승' : match.name_b}
+                    name={
+                      match.player_b === null
+                        ? // 승자가 이미 정해졌는데 상대가 없으면 부전승,
+                          // 아직 정해지지 않았으면 앞 경기를 기다리는 자리
+                          match.winner !== null
+                          ? '부전승'
+                          : null
+                        : match.name_b
+                    }
                     score={match.score_b}
                     won={match.winner !== null && match.winner === match.player_b}
                     lost={match.winner !== null && match.winner !== match.player_b}
