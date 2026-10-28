@@ -33,6 +33,9 @@ yarn-error.*
 # local env files
 .env*.local
 
+# 부스 계정 같은 로컬 메모 (절대 공개 저장소에 올리지 않습니다)
+*.local.txt
+
 # typescript
 *.tsbuildinfo
 
